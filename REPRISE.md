@@ -4,14 +4,15 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (11/11/2026)
 
-- Version 0.1.0 : squelette de test. API, interface et tests fonctionnent en local (7 tests verts, interface compilée, écrans vérifiés en sombre et clair, PC et iPhone).
-- **Pas encore fait** : image Docker jamais construite (pas de Docker dans l'environnement de développement), jamais déployée sur le NAS.
+- Version 0.1.0 : squelette de test. 7 tests verts, image construite par GitHub Actions et publiée sur ghcr.io.
+- **Déployé sur le NAS le 11/11/2026** dans homelab.yml (port 8090, volume `${DOCKER_ROOT}/socle`, variable `APPS_PASSWORD`). Vérifié par Julien : connexion, synthèse en tuiles avec graphique, écriture dans /data.
+- Conclusion du test : Svelte 5 + Tailwind 4 + shadcn-svelte tient sur le DS1520+. shadcn-svelte est retenu pour Frise.
 
 ## Prochaine étape
 
-1. Pousser le dépôt sur GitHub, vérifier que les deux workflows passent (tests, image).
-2. Déployer dans homelab.yml et faire la vérification du README.
-3. Si le déploiement tient : shadcn-svelte est confirmé pour Frise. Sinon : le retirer du plan.
+1. Frise : étape 0, sonde d'Immich (dans le dépôt de Frise).
+2. Après Frise : écrire ici le document du socle (stack, déploiement, design, connexion, sécurité) à partir de ce qui a marché, et la planche de couleurs.
+3. Juger le design à l'usage : une semaine sur iPhone et tablette avant de le généraliser.
 
 ## Décisions tranchées
 
