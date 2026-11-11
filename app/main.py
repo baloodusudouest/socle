@@ -77,6 +77,22 @@ async def garde(request: Request, appel):
     return reponse
 
 
+class LectureSeule(Exception):
+    """Écriture refusée : l'appli tourne en lecture seule (APP_LECTURE_SEULE)."""
+
+
+def exiger_ecriture(quoi: str = "") -> None:
+    """À appeler en tête de toute route, et de toute fonction, qui écrit chez un service extérieur
+    (iCloud, Immich, fichiers d'une photothèque…). Le refus arrive avant toute trace dans un journal."""
+    if ETAT["cfg"].lecture_seule:
+        raise LectureSeule(f"Mode lecture seule : rien n'est écrit{' dans ' + quoi if quoi else ''}.")
+
+
+@app.exception_handler(LectureSeule)
+async def _lecture_seule(_: Request, exc: LectureSeule):
+    return JSONResponse({"detail": str(exc)}, status_code=409)
+
+
 # ================================================================ public
 
 @app.get("/health")
@@ -89,7 +105,8 @@ def sante():
 @app.get("/api/session")
 def session(request: Request):
     s = ETAT["sessions"]
-    return {"connecte": s.valide(request.cookies.get(s.cookie)), "version": __version__}
+    return {"connecte": s.valide(request.cookies.get(s.cookie)), "version": __version__,
+            "lecture_seule": ETAT["cfg"].lecture_seule}
 
 
 @app.post("/api/connexion")
@@ -115,6 +132,17 @@ def deconnexion():
     r = JSONResponse({"ok": True})
     r.delete_cookie(s.cookie)
     return r
+
+
+# ================================================================ exemple d'écriture gardée
+
+@app.post("/api/essai-ecriture")
+def essai_ecriture():
+    """Modèle d'une route qui écrit : la garde d'abord, l'écriture ensuite. Ici, un simple fichier
+    témoin dans /data (une vraie appli écrirait chez un service extérieur)."""
+    exiger_ecriture("le dossier de données")
+    (ETAT["cfg"].data / "temoin.txt").write_text(datetime.now().isoformat(timespec="seconds"))
+    return {"ok": True}
 
 
 # ================================================================ synthèse

@@ -4,15 +4,15 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (11/11/2026)
 
-- Version 0.1.0 : squelette de test. 7 tests verts, image construite par GitHub Actions et publiée sur ghcr.io.
+- **Version 0.2.0** (11/11/2026) : le format commun, éprouvé sur carnet, Millésime et la vérification des dates, est écrit dans [`docs/format.md`](docs/format.md) ; le squelette gagne « Connexion », « Réglages », le mode lecture seule et les neutres chauds. 8 tests verts.
+- Version 0.1.0 : squelette de test, image construite par GitHub Actions et publiée sur ghcr.io.
 - **Déployé sur le NAS le 11/11/2026** dans homelab.yml (port 8090, volume `${DOCKER_ROOT}/socle`, variable `APPS_PASSWORD`). Vérifié par Julien : connexion, synthèse en tuiles avec graphique, écriture dans /data.
 - Conclusion du test : Svelte 5 + Tailwind 4 + shadcn-svelte tient sur le DS1520+. shadcn-svelte est retenu pour Frise.
 
 ## Prochaine étape
 
-1. Frise : étape 0, sonde d'Immich (dans le dépôt de Frise).
-2. Après Frise : écrire ici le document du socle (stack, déploiement, design, connexion, sécurité) à partir de ce qui a marché, et la planche de couleurs.
-3. Juger le design à l'usage : une semaine sur iPhone et tablette avant de le généraliser.
+1. Kit d'urgence, Frise, puis l'Anneau unique : chacun part de `docs/format.md`.
+2. Juger le format à l'usage sur les trois applis en service, et corriger ce document en conséquence.
 
 ## Décisions tranchées
 
@@ -25,6 +25,8 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## Pièges
 
+- L'écran « Connexion » (les services) est `pages/Services.svelte` ; `pages/Connexion.svelte` est la page du mot de passe. Même piège dans carnet et Millésime.
+- Les neutres du socle étaient froids (teinte 260) ; ils sont maintenant ceux de carnet. Ne pas revenir en arrière : le froid a été refusé.
 - Le registre shadcn-svelte.com n'est pas joignable depuis l'environnement de Claude : utiliser `tools/shadcn-local.mjs`.
 - Les sources shadcn-svelte utilisent des classes abstraites `cn-…` ; elles ne marchent pas copiées telles quelles, il faut passer par l'outil ou la commande officielle.
 - Le graphique (LayerChart) pèse lourd : l'interface fait 562 Ko (172 Ko compressée), contre quelques dizaines sans lui. À charger à la demande dans une appli qui n'affiche pas de graphique dès l'accueil.
