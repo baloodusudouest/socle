@@ -1,0 +1,14 @@
+# Service socle à placer dans la stack homelab.yml (Portainer).
+# Les variables viennent des « Environment variables » de la stack (voir .env.example).
+services:
+  socle:
+    image: ghcr.io/baloodusudouest/socle:${SOCLE_VERSION:-latest}
+    container_name: socle
+    restart: unless-stopped
+    ports:
+      - "${PORT_SOCLE:-8090}:8090"          # réseau local et Tailscale uniquement
+    environment:
+      - TZ=Europe/Paris
+      - APP_PASSWORD=${APPS_PASSWORD}       # mot de passe commun à toutes les applis
+    volumes:
+      - ${SOCLE_DATA_DIR}:/data             # état de l'appli (ici : un seul petit fichier)
