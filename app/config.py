@@ -14,6 +14,7 @@ class Config:
     data: Path
     static: Path
     attente_connexion: bool = True   # délai anti-essais ; coupé dans les tests
+    lecture_seule: bool = False      # 0.2.0 : l'appli lit tout mais n'écrit nulle part hors de chez elle
 
 
 def charger() -> Config:
@@ -24,4 +25,5 @@ def charger() -> Config:
         password=mot_de_passe,
         data=Path(os.environ.get("APP_DATA", "/data")),
         static=Path(__file__).parent / "static",
+        lecture_seule=os.environ.get("APP_LECTURE_SEULE", "").strip().lower() in ("oui", "1", "true", "yes"),
     )

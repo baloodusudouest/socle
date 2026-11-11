@@ -71,3 +71,17 @@ def test_cookie_falsifie_refuse(client):
 def test_interface_non_compilee_signalee(client):
     r = client.get("/")
     assert r.status_code == 404 and "non compilée" in r.json()["detail"]
+
+
+def test_lecture_seule_refuse_avant_d_ecrire(client, tmp_path):
+    import dataclasses
+    connecter(client)
+    assert client.get("/api/session").json()["lecture_seule"] is False
+    assert client.post("/api/essai-ecriture").status_code == 200 and (tmp_path / "temoin.txt").exists()
+    (tmp_path / "temoin.txt").unlink()
+    main.ETAT["cfg"] = dataclasses.replace(main.ETAT["cfg"], lecture_seule=True)
+    assert client.get("/api/session").json()["lecture_seule"] is True
+    r = client.post("/api/essai-ecriture")
+    assert r.status_code == 409 and "lecture seule" in r.json()["detail"]
+    assert not (tmp_path / "temoin.txt").exists()
+    assert client.get("/api/synthese").status_code == 200           # la lecture continue

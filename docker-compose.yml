@@ -10,5 +10,6 @@ services:
     environment:
       - TZ=Europe/Paris
       - APP_PASSWORD=${APPS_PASSWORD}       # mot de passe commun à toutes les applis
+      - APP_LECTURE_SEULE=${APP_LECTURE_SEULE:-}   # « oui » : lecture seule
     volumes:
       - ${SOCLE_DATA_DIR}:/data             # état de l'appli (ici : un seul petit fichier)

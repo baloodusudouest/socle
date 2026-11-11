@@ -3,7 +3,8 @@
 @import "shadcn-svelte/tailwind.css";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Thème du socle : minimalisme, sombre par défaut, clair si l'appareil le demande.
+   Thème du socle : minimalisme chaleureux (neutres teintés, ceux de carnet), sombre par défaut,
+   clair si l'appareil le demande.
    UNE SEULE LIGNE À CHANGER PAR APPLI : la couleur --app (sombre et clair).
    ───────────────────────────────────────────────────────────────────────────── */
 
@@ -20,19 +21,19 @@
   --app-contraste: oklch(0.2 0.03 205);   /* texte posé sur la couleur de l'appli */
 
   --radius: 0.75rem;
-  --background: oklch(0.165 0.004 260);
-  --foreground: oklch(0.96 0.003 260);
-  --card: oklch(0.205 0.005 260);
+  --background: #151311;
+  --foreground: #f2ece2;
+  --card: #1f1c19;
   --card-foreground: var(--foreground);
-  --popover: oklch(0.225 0.005 260);
+  --popover: #25211d;
   --popover-foreground: var(--foreground);
   --primary: var(--app);
   --primary-foreground: var(--app-contraste);
-  --secondary: oklch(0.265 0.005 260);
+  --secondary: #2a2521;
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.25 0.005 260);
-  --muted-foreground: oklch(0.7 0.01 260);
-  --accent: oklch(0.265 0.005 260);
+  --muted: #2a2521;
+  --muted-foreground: #a89e91;
+  --accent: #2a2521;
   --accent-foreground: var(--foreground);
   --destructive: oklch(0.72 0.18 22);
   --border: oklch(1 0 0 / 0.1);
@@ -48,14 +49,14 @@
     --app: oklch(0.5 0.11 225);
     --app-contraste: oklch(0.99 0 0);
 
-    --background: oklch(0.985 0.002 260);
-    --foreground: oklch(0.21 0.01 260);
-    --card: oklch(1 0 0);
-    --popover: oklch(1 0 0);
-    --secondary: oklch(0.955 0.003 260);
-    --muted: oklch(0.955 0.003 260);
-    --muted-foreground: oklch(0.48 0.01 260);
-    --accent: oklch(0.955 0.003 260);
+    --background: #faf7f2;
+    --foreground: #1e1a16;
+    --card: #f1ece3;
+    --popover: #fffdf9;
+    --secondary: #ebe5da;
+    --muted: #ebe5da;
+    --muted-foreground: #6f665b;
+    --accent: #ebe5da;
     --destructive: oklch(0.55 0.2 25);
     --border: oklch(0 0 0 / 0.1);
     --input: oklch(0 0 0 / 0.16);

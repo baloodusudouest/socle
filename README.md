@@ -4,15 +4,18 @@ Squelette commun des applis auto-hébergées : **FastAPI** + **Svelte 5** + **Ta
 
 C'est un **modèle à copier** : une nouvelle appli part d'une copie de ce dépôt, puis change son nom, sa couleur et ses écrans.
 
-## Ce que contient la version 0.1.0
+Le format commun des applis (navigation, tuiles, Connexion, Réglages, couleurs, règles de sécurité, méthode) est décrit dans [`docs/format.md`](docs/format.md).
+
+## Ce que contient la version 0.2.0
 
 | Élément | Où | Rôle |
 |---|---|---|
 | API | `app/` | Santé, connexion par mot de passe, mesures réelles du conteneur |
-| Interface | `frontend/` | Écran de synthèse en tuiles bento, planche des composants |
+| Interface | `frontend/` | Rail et pilule, écran de synthèse en tuiles, « Connexion » (une tuile par service), « Réglages », planche des composants |
+| Lecture seule | `APP_LECTURE_SEULE=oui` | Modèle de route gardée (`exiger_ecriture`), bandeau dans l'interface |
 | Composants | `frontend/src/lib/components/ui/` | Bouton, carte, pastille, avancement, graphique, séparateur (shadcn-svelte, style « nova ») |
 | Thème | `frontend/src/app.css` | Minimalisme, sombre par défaut, clair si l'appareil le demande |
-| Tests | `tests/` | 7 tests de l'API |
+| Tests | `tests/` | 8 tests de l'API |
 | Image | `Dockerfile` | Construction en 3 étapes, publiée sur ghcr.io par GitHub Actions |
 
 ## Déployer sur le NAS (Portainer)
