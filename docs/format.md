@@ -21,16 +21,16 @@ Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour l
 
 | Appli | Couleur | Valeur |
 |---|---|---|
-| carnet | ocre | `#d9a441` |
+| carnet | argent (l'ocre jusqu'au 14/11/2026) | `#b7c0cc` |
 | Millésime | lie-de-vin | `#b8405f` |
 | vérification des dates | bleu ardoise | `#7f9cc4` |
 | kit d'urgence | rouge brique | `#c8553d` |
-| Sillage | or chaud | `#e3b556` |
+| Sillage | lavande crépuscule (le miel doré jusqu'au 14/11/2026) | `#a98fd8` |
 | Transhumance | vert de pré | `#8fae6b` |
-| l'Anneau | or pâle | `#e2c98a` |
+| l'Anneau | or pâle — seule appli en or | `#e2c98a` |
 | socle (modèle) | bleu-vert | `--app` dans `app.css` |
 
-⚠️ carnet, Sillage et l'Anneau sont trois ors voisins : côte à côte dans l'Anneau, on ne les distingue pas bien (§ 7).
+L'or est réservé à l'Anneau, la porte qui montre toutes les autres (décision du 14/11/2026 : carnet, Sillage et l'Anneau avaient trois ors voisins).
 
 Neutres communs : fond `#151311`, surface `#1f1c19`, filet `#312c27`, texte `#f2ece2`, texte secondaire `#a89e91`. Un premier essai en neutres froids a été jugé trop froid. Les valeurs claires (`#faf7f2`, `#1e1a16`…) ne servent plus.
 
@@ -86,7 +86,7 @@ Comparaison des applis en service avec ce document. Rien n'est corrigé d'office
 |---|---|---|
 | toutes | Le document disait « clair quand l'appareil le demande » ; toutes sont toujours sombres. **Corrigé ici.** | — |
 | toutes | Plusieurs ont des adresses à jeton que le § 3.1 ne prévoyait pas. **Règle ajoutée ici.** | — |
-| carnet, Sillage, l'Anneau | Trois ors voisins (`#d9a441`, `#e3b556`, `#e2c98a`). | à trancher : garder l'or pour une seule |
+| carnet, Sillage, l'Anneau | Trois ors voisins. **Tranché le 14/11/2026** : l'Anneau garde l'or, carnet passe en argent (2.18.2), Sillage en lavande (0.10.1). | — |
 | Transhumance | Deux entrées seulement (Migrer, Connexion), pas de Réglages : version et déconnexion sont dans Connexion. Sur téléphone, barre en haut au lieu de la pilule flottante en bas. | faible : outil d'une seule fois, à retirer de la stack après la migration |
 | Transhumance | Les demandes de Millésime arrivent dans Migrer, pas dans une tuile « À traiter ». | faible, même raison |
 | Sillage | Pas d'« À traiter » ; ce qui attend une décision est la tuile « À vérifier » dans Sillages. Pas de journal des écritures : Sillage n'écrit que dans sa propre base (corrections, récits, hôtes). | conforme à l'esprit (§ 2) |
