@@ -6,7 +6,9 @@ C'est un **modèle à copier** : une nouvelle appli part d'une copie de ce dép�
 
 Le format commun des applis (navigation, tuiles, Connexion, Réglages, couleurs, règles de sécurité, méthode) est décrit dans [`docs/format.md`](docs/format.md).
 
-## Ce que contient la version 0.2.0
+Avant de créer une appli : [`docs/format.md`](docs/format.md) (le format) et [`docs/lecons.md`](docs/lecons.md) (ce que les applis précédentes ont appris). Versions : [`CHANGELOG.md`](CHANGELOG.md).
+
+## Ce que contient le socle
 
 | Élément | Où | Rôle |
 |---|---|---|
