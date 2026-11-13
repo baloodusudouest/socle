@@ -1,6 +1,6 @@
 # Ce que les applis ont appris au socle
 
-Journal de ce qui a été construit, cassé et corrigé en partant du socle (novembre 2026), écrit pour qu'une nouvelle session puisse repartir d'ici et refaire une appli sans retomber dans les mêmes trous.
+Journal de ce qui a été construit, cassé et corrigé en partant du socle (novembre 2026, complété le 14/11), écrit pour qu'une nouvelle session puisse repartir d'ici et refaire une appli sans retomber dans les mêmes trous.
 
 Tout est générique ou anonymisé : aucune adresse, aucun nom, aucune liste réelle de services. Les exemples d'adresses sont en `192.0.2.x` (plage réservée à la documentation). Le format visuel et la méthode sont dans [`format.md`](format.md) ; ce document les complète, il ne les répète pas.
 
@@ -159,7 +159,53 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 | Une dépendance entre deux applis découverte au déploiement | Une première version autonome ; le lien avec l'autre appli vient après |
 | Un service ajouté à la stack avant d'avoir une image | Coder et publier d'abord, ajouter ensuite |
 
-## 11. Ce qui reste vrai d'une appli à l'autre
+## 11. Données : comparer, dater, regrouper (ajouté le 14/11/2026)
+
+**Comparer avec ce qu'un service a gardé.** Un service qui stocke des fiches (CardDAV, par exemple) ne rend pas le texte reçu : il fusionne les paramètres répétés (`TYPE=CELL;TYPE=VOICE` devient `TYPE=CELL,VOICE`), retire le `;` final de certains champs, jette les propriétés propres à un autre logiciel (`X-…`), et une photo peut revenir comme un lien signé qui change à chaque lecture. Comparer le texte brut donne des centaines de faux écarts. Remède : une empreinte calculée après la même normalisation que le service (paramètres triés et fusionnés, champs vides finaux retirés, propriétés étrangères ignorées, un lien de photo compté comme « une photo », pas comme une valeur). L'écran ne montre que les écarts qui restent, valeurs masquées.
+
+**Dater d'après un nom de dossier ou d'album.**
+- Lire : une année à quatre chiffres, un mois écrit en toutes lettres avec son année, une fourchette `AAAA-AAAA` (écart plafonné, vingt ans ici : au-delà, ce n'est plus une date).
+- **Écarter les noms de lot** : « Numérisations 2010 », « Scans 2015 » donnent la date du scan, pas celle de la photo. Une liste de mots de lot, testée.
+- Une fourchette donne une date au milieu avec une marge d'une demi-fourchette, et la raison écrite (« date lue dans … »).
+- Le dossier le plus proche gagne sur ses parents ; l'album ne passe qu'à défaut.
+- Proposer, montrer la date qui sera posée en face de chaque dossier, la laisser modifier, puis dater d'un coup ; le lot reste annulable.
+
+**Regrouper un chemin de vie.** Des étapes de même nom à moins de deux mois l'une de l'autre n'en font qu'une (« trois fois »). Des photos toutes datées du 1er du mois sont des dates approximatives (scans) : les regrouper par année plutôt que d'en faire autant d'étapes.
+
+**Relire sans tout relire.** Garder, pour chaque élément, sa date de dernière modification côté service, et ne relire en détail que ceux qui ont changé. Pour ce qui n'a pas de date de modification (les visages reconnus, par exemple), relire une tranche chaque heure, choisie par une empreinte de l'identifiant : tout est relu en un cycle, sans pic. Le bouton « Synchroniser » garde la relecture complète.
+
+**Ce qu'une API de photos a appris** (Immich, vérifié sur de vraies données) :
+- une recherche avec plusieurs personnes rend l'**intersection** (les photos où elles sont toutes) ;
+- les personnes d'une photo se demandent explicitement (`withPeople`), elles ne viennent pas d'office ;
+- retirer un visage d'une personne : créer une personne sans nom, puis y rattacher le visage ;
+- une vidéo se sert par l'appli en relayant l'en-tête `Range`, sinon le navigateur ne peut pas avancer dedans ;
+- les vignettes relues souvent se gardent sur disque, avec une taille plafond réglable dans la stack (0 : pas de cache).
+
+## 12. Gestes et écrans (ajouté le 14/11/2026)
+
+- **Un choix fait à la main n'est jamais repassé par une règle automatique.** Une règle de groupe (« dans ce groupe, un portable est professionnel ») remettait en silence le type qu'on venait de changer : « Aucun changement », bouton grisé. Remède : marquer la valeur choisie à la main (`type_choisi`) et faire sauter les règles sur elle ; la règle ne s'applique qu'aux valeurs nouvelles.
+- **Un bouton grisé dit pourquoi.** « Aucun changement » sans raison est un bug pour qui le voit : écrire, sous le bouton, ce qui a été écarté ou ce qui revient au même une fois mis en forme.
+- **Une question à deux réponses par ligne** se pose avec deux boutons à icône (`aria-pressed`, 44 px au moins), la valeur actuelle déjà allumée, plutôt qu'avec des boutons radio.
+- **Réponses dans le désordre.** On passe vite d'un élément au suivant : la réponse du premier arrive après celle du second et l'écrase (« photo 1 sur 0 »). Remède : un compteur de demandes ; une réponse qui n'est pas la dernière demandée est jetée.
+- **Un geste qui ne vaut qu'une fois** (détacher un visage) est refusé par le serveur quand son état de départ n'est plus là, pas seulement grisé à l'écran : un double clic ou un second appareil passent sinon.
+- **Une page sans mot de passe pour un écran mural** : une adresse à jeton, qui ne montre que ce qui est prévu (pas de lien vers le service, pas de photo en grand), expire seule (le lendemain du séjour, midi), redonne le même lien aux mêmes invités et invalide l'ancien quand ils changent. Elle est préparée par l'outil de la maison qui connaît le séjour, avec son propre jeton.
+- **Une carte de tableau de bord peut avaler les clics et le défilement** d'un cadre qu'elle contient (Home Assistant, `button-card` : `preventDefault` sur les liens, roulette et toucher pris par l'effet d'onde). Remède : `pointer-events: none` sur la carte et `auto` sur le cadre ; un lien « ouvrir en grand » dans une carte à part (markdown), qui ouvre bien un nouvel onglet.
+- **Un identifiant de pièce, de chambre ou de zone** se vérifie dans la configuration réelle : un tiret bas de plus (`chambre_d_ami` contre `chambre_ami`) et rien ne s'affiche, sans erreur.
+
+## 13. Applis qui s'enchaînent (ajouté le 14/11/2026)
+
+- **Une appli demande, l'autre décide.** La première signale (« ce dossier est daté »), avec un jeton à elle, sur une adresse à part (`/externe/…`) ; elle ne lance rien chez l'autre. Jeton vide dans la stack : l'adresse est fermée.
+- **Le passage automatique est une case, décochée par défaut**, dans l'appli qui fait le travail. Il prend la plus ancienne demande, vérifie la place avant, marque l'erreur sur la demande et passe à la suivante.
+- **Un automatisme ne s'enchaîne jamais sur une suppression.** Envoyer et contrôler peuvent être automatiques ; supprimer des originaux reste un clic, avec le nombre attendu redonné par l'écran (un écran périmé ne supprime rien).
+- **Un intégrateur qui se trompe d'état.** Un tableau de bord peut afficher « erreur » pour une mise à jour de conteneur qui s'installe bel et bien (délai dépassé quand il suit des dizaines d'entités) : vérifier sur le service avant de corriger quoi que ce soit.
+
+## 14. Tests, en plus (ajouté le 14/11/2026)
+
+- **Le serveur de démonstration est partagé** entre les tests PC et téléphone : un test qui consomme un cas (le valide) le fait disparaître pour l'autre taille. Le second saute (`skip`) en le disant, plutôt que d'échouer.
+- **Chaque cas d'écran a sa fiche de démonstration** : en ajouter une plutôt que modifier une fiche dont d'autres tests comptent les points.
+- **Une image « chargée »** se vérifie par le statut de sa demande, pas par son rendu : le rendu dépend du navigateur des tests.
+
+## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.
 - Le périmètre annoncé dit aussi ce qui **n'est pas** fait.

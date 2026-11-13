@@ -2,10 +2,11 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
-## État (13/11/2026)
+## État (14/11/2026)
 
+- **0.3.2** (14/11/2026) : `docs/lecons.md` complété (§ 11 à 14), `docs/format.md` à jour (toujours sombre, couleurs des sept applis, adresses à jeton, relevé des écarts au § 7). Pas de changement de code.
 - **0.3.1** (13/11/2026) : toujours sombre (blocs `prefers-color-scheme: light` retirés, variante `dark:` partout).
-- **Version 0.3.0** (13/11/2026) : connexion commune (cookie `maison_session`, `Sessions.connecte`) ; [`docs/lecons.md`](docs/lecons.md), à lire avant de créer une appli ; `CHANGELOG.md`. La connexion commune n'a pas encore été essayée sur la vraie installation.
+- **Version 0.3.0** (13/11/2026) : connexion commune (cookie `maison_session`, `Sessions.connecte`) ; [`docs/lecons.md`](docs/lecons.md), à lire avant de créer une appli ; `CHANGELOG.md`. La connexion commune est en service dans les sept applis maison (carnet, Millésime, vérification des dates, kit d'urgence, Transhumance, Sillage, l'Anneau).
 - Le socle a un mot de passe depuis la 0.1.0 (`APP_PASSWORD`, douze caractères au moins). Dans la stack, il reçoit désormais le même mot de passe que les autres applis, sans quoi la connexion commune ne joue pas.
 - **Version 0.2.0** (11/11/2026) : le format commun, éprouvé sur carnet, Millésime et la vérification des dates, est écrit dans [`docs/format.md`](docs/format.md) ; le squelette gagne « Connexion », « Réglages », le mode lecture seule et les neutres chauds. 8 tests verts.
 - Version 0.1.0 : squelette de test, image construite par GitHub Actions et publiée sur ghcr.io.
@@ -14,8 +15,8 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## Prochaine étape
 
-1. Kit d'urgence, Frise, puis l'Anneau unique : chacun part de `docs/format.md`.
-2. Juger le format à l'usage sur les trois applis en service, et corriger ce document en conséquence.
+1. Trancher les écarts du § 7 de `docs/format.md` à la réouverture de chaque appli (un passage au conseil sur les écarts), en commençant par les trois ors voisins (carnet, Sillage, l'Anneau).
+2. Tenir `docs/lecons.md` à jour à la fin de chaque chantier, générique et anonymisé.
 
 ## Décisions tranchées
 
