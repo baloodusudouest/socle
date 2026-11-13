@@ -2,11 +2,13 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
-## État (11/11/2026)
+## État (13/11/2026)
 
+- **Version 0.3.0** (13/11/2026) : connexion commune (cookie `maison_session`, `Sessions.connecte`) ; [`docs/lecons.md`](docs/lecons.md), à lire avant de créer une appli ; `CHANGELOG.md`. La connexion commune n'a pas encore été essayée sur la vraie installation.
+- Le socle a un mot de passe depuis la 0.1.0 (`APP_PASSWORD`, douze caractères au moins). Dans la stack, il reçoit désormais le même mot de passe que les autres applis, sans quoi la connexion commune ne joue pas.
 - **Version 0.2.0** (11/11/2026) : le format commun, éprouvé sur carnet, Millésime et la vérification des dates, est écrit dans [`docs/format.md`](docs/format.md) ; le squelette gagne « Connexion », « Réglages », le mode lecture seule et les neutres chauds. 8 tests verts.
 - Version 0.1.0 : squelette de test, image construite par GitHub Actions et publiée sur ghcr.io.
-- **Déployé sur le NAS le 11/11/2026** dans homelab.yml (port 8090, volume `${DOCKER_ROOT}/socle`, variable `APPS_PASSWORD`). Vérifié par Julien : connexion, synthèse en tuiles avec graphique, écriture dans /data.
+- **Déployé sur le NAS le 11/11/2026** dans homelab.yml (port 8090, volume `${DOCKER_ROOT}/socle`, variable `APPS_PASSWORD`). Vérifié sur place : connexion, synthèse en tuiles avec graphique, écriture dans /data.
 - Conclusion du test : Svelte 5 + Tailwind 4 + shadcn-svelte tient sur le DS1520+. shadcn-svelte est retenu pour Frise.
 
 ## Prochaine étape
