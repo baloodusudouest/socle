@@ -15,7 +15,7 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## Prochaine étape
 
-1. Trancher les écarts du § 7 de `docs/format.md` à la réouverture de chaque appli (un passage au conseil sur les écarts), en commençant par les trois ors voisins (carnet, Sillage, l'Anneau).
+1. Trancher les écarts restants du § 7 de `docs/format.md` à la réouverture de chaque appli (les trois ors : tranché le 14/11, l'or reste à l'Anneau).
 2. Tenir `docs/lecons.md` à jour à la fin de chaque chantier, générique et anonymisé.
 
 ## Décisions tranchées
