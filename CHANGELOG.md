@@ -1,5 +1,8 @@
 # Journal des versions
 
+## 0.4.3 — 14 novembre 2026
+- `docs/lecons.md` § 19 : envoi d'un gros fichier par morceaux avec reprise, tâche de fond qui reprend après un redémarrage, chiffres lus par Tesseract (liste blanche trompeuse, lecture libre de confirmation), service de lecture en ligne (une seule fonction, sortie douteuse, lecture seule), EPUB (liste des pages, repère de page, fichiers qui commencent à un titre, contrat avec l'appli lectrice), faux service remis en place après les tests ; § 15 : la première vraie donnée bat les données inventées (appris en construisant Scriptorium). Pas de changement de code.
+
 ## 0.4.2 — 14 novembre 2026
 - `docs/format.md` : couleurs de Scriptorium, Comptoir et Gazette ajoutées au tableau.
 - `docs/lecons.md` § 16 à 18 : un document imprimé (aperçu et PDF par le même HTML, polices embarquées, débordements mesurés), une source publique limitée (User-Agent, pauses, cache, textes non libres, SPARQL en POST), port publié et port du conteneur (appris en construisant Gazette). Pas de changement de code.

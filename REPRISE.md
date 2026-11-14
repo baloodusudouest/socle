@@ -4,6 +4,7 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (14/11/2026)
 
+- **0.4.3** (14/11/2026) : `docs/lecons.md` § 19, appris en construisant Scriptorium (gros fichiers, Tesseract, lecture en ligne, EPUB). Pas de changement de code.
 - **0.4.0** (14/11/2026) : page « Documents » (`frontend/src/pages/Documents.svelte`) ; les .md sont importés en `?raw` au moment de compiler. Une appli partie du socle retire cette page, comme « Composants ».
 - **0.3.2** (14/11/2026) : `docs/lecons.md` complété (§ 11 à 14), `docs/format.md` à jour (toujours sombre, couleurs des sept applis, adresses à jeton, relevé des écarts au § 7). Pas de changement de code.
 - **0.3.1** (13/11/2026) : toujours sombre (blocs `prefers-color-scheme: light` retirés, variante `dark:` partout).

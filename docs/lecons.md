@@ -228,9 +228,49 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 
 - **Le port publié n'est pas le port du conteneur.** Un outil qui écoute sur 8099 dans son conteneur peut être publié sur un autre port du NAS, et un autre outil peut déjà publier 8099. Vérifier la colonne de gauche de `ports:` dans la stack, variables comprises (leur valeur est dans Portainer, pas dans le fichier).
 
+## 19. Gros fichiers, lecture de pages et livres numériques (appris en construisant Scriptorium, 14/11/2026)
+
+**Envoyer un gros fichier depuis le navigateur** (plusieurs centaines de Mo) :
+
+- Par morceaux de quelques Mo, chacun envoyé avec sa position de départ. Le serveur écrit au fil de l'eau, sans rien garder en mémoire, et renvoie la taille reçue.
+- Une position qui ne tombe pas juste reçoit un refus (409) qui donne la taille déjà reçue : le navigateur reprend de là. Un morceau renvoyé après une coupure n'est jamais ajouté deux fois, et aucun trou n'est possible.
+- La taille annoncée au départ sert de plafond (413 au-delà).
+- Le fichier reste « partiel » jusqu'à la fin : là, on vérifie sa taille et sa signature (`%PDF-`), puis on le renomme.
+- La place libre se vérifie avant de commencer, en comptant tout ce que l'appli en tirera (ici environ trois fois la taille du fichier).
+
+**Travail long sur le NAS** : une tâche de fond, son état et son avancement en base. L'écran lit l'avancement, et on peut le fermer. Un redémarrage reprend où l'on en était : ce qui est déjà fait n'est pas refait.
+
+**Lire des chiffres avec Tesseract** :
+
+- Avec une liste blanche de chiffres, Tesseract change n'importe quelle lettre en chiffre (le « Z » d'un index de marge devenait « 2 »). Un nombre n'est gardé que si une lecture libre, sans liste blanche, le confirme.
+- On lit une seule ligne d'encre (la dernière d'un bas de page) ; une ligne de texte se reconnaît à ses nombreuses taches ou à un bloc large, et elle est écartée.
+- Les bords noirs d'un scan ne sont pas de l'encre : une colonne surtout noire est retirée avant l'analyse.
+- Même ainsi, sur un vrai livre, la lecture locale est restée moins sûre que celle d'un service de lecture en ligne. La sonde aurait dû le mesurer sur de vraies pages avant qu'on construise l'inventaire dessus.
+
+**Service de lecture en ligne (OCR)** :
+
+- Tout l'appel tient dans une seule fonction, pour pouvoir changer de service.
+- Une sortie qui n'a pas l'air d'un texte (des données JSON à la place, presque rien) est marquée douteuse. La page entre alors en image dans le livre, et rien ne manque.
+- Une clé refusée ou un crédit épuisé arrête tout de suite : inutile d'insister page après page.
+- Le mode lecture seule bloque aussi l'envoi : le contenu sortirait de la maison, et chaque page est payante.
+- Le service peut inventer des mots plausibles sur un texte petit ou de travers. La qualité de la prise compte plus que le choix du moteur : une page droite, seule, sans la table autour.
+
+**Fabriquer un EPUB** (EbookLib) :
+
+- EbookLib n'écrit pas la liste des pages du livre papier (`nav epub:type="page-list"`). On la glisse dans `nav.xhtml` en réécrivant l'archive, avec `mimetype` en premier et non compressé.
+- Le repère de page est un `<span epub:type="pagebreak" title="72">` posé dans le fil du texte. KOReader s'en sert, et une appli qui lit l'EPUB aussi.
+- Quand une autre appli découpe l'EPUB en unités (recettes) :
+  - les pages sont regroupées en fichiers qui ne commencent qu'à un titre, pour ne jamais couper une unité en deux ;
+  - les identifiants sont préfixés par page, pour qu'aucun ne se répète dans un même fichier ;
+  - le contrat (titre en `h1`–`h3`, liste en `ul`, repère de page) est écrit dans le `REPRISE.md` des deux applis.
+- Chaque fichier XHTML doit être du XML bien formé : un test le vérifie.
+
+**Tests** : un serveur de démonstration qui remplace une fonction (un faux service de lecture) doit la remettre en place après usage. Sinon, les tests qui passent après lui voient le faux.
+
 ## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.
 - Le périmètre annoncé dit aussi ce qui **n'est pas** fait.
 - Ce qui n'a tourné que contre de faux services est dit tel quel, à chaque livraison.
+- La première vraie donnée bat les données inventées : un vrai livre a cassé dès la première heure la lecture des numéros de page qui passait tous ses tests.
 - Un réglage qui retire une protection (affichage dans un cadre, connexion sans mot de passe sur le réseau local) se propose, avec son prix, et ne se pose pas d'office.
