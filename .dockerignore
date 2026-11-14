@@ -8,4 +8,4 @@ app/static
 tests
 tools
 data
-docs
+# docs/ est lu par la page « Documents » (0.4) : ne pas l'exclure
