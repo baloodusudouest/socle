@@ -1,5 +1,9 @@
 # Journal des versions
 
+## 0.4.2 — 14 novembre 2026
+- `docs/format.md` : couleurs de Scriptorium, Comptoir et Gazette ajoutées au tableau.
+- `docs/lecons.md` § 16 à 18 : un document imprimé (aperçu et PDF par le même HTML, polices embarquées, débordements mesurés), une source publique limitée (User-Agent, pauses, cache, textes non libres, SPARQL en POST), port publié et port du conteneur (appris en construisant Gazette). Pas de changement de code.
+
 ## 0.4.1 — 14 novembre 2026
 - `docs/lecons.md` : écran allumé seulement en HTTPS, carte du monde embarquée, page source écrasée par sa version compilée, icône du squelette à remplacer (appris en construisant Comptoir). Pas de changement de code.
 

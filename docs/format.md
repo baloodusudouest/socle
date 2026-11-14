@@ -28,6 +28,9 @@ Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour l
 | Sillage | lavande crépuscule (le miel doré jusqu'au 14/11/2026) | `#a98fd8` |
 | Transhumance | vert de pré | `#8fae6b` |
 | l'Anneau | or pâle — seule appli en or | `#e2c98a` |
+| Scriptorium | parchemin | `#c4a07a` |
+| Comptoir | ambre | `#e0884a` |
+| Gazette | vert anis (signature : l'aperçu du journal, papier crème `#F7F3EA`) | `#b5c94f` |
 | socle (modèle) | bleu-vert | `--app` dans `app.css` |
 
 L'or est réservé à l'Anneau, la porte qui montre toutes les autres (décision du 14/11/2026 : carnet, Sillage et l'Anneau avaient trois ors voisins).

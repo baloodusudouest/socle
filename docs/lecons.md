@@ -209,6 +209,25 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 - **Chaque cas d'écran a sa fiche de démonstration** : en ajouter une plutôt que modifier une fiche dont d'autres tests comptent les points.
 - **Une image « chargée »** se vérifie par le statut de sa demande, pas par son rendu : le rendu dépend du navigateur des tests.
 
+## 16. Fabriquer un document imprimé (appris en construisant Gazette, 14/11/2026)
+
+- **Un seul document pour l'aperçu et l'impression.** Le livret est une page HTML dont les polices sont embarquées en `data:` (avec leur `unicode-range` latin et latin-ext) : la même page sert l'aperçu dans un cadre, sous une politique de contenu stricte (`default-src 'none'`), et le PDF rendu par Chromium. Aucun fichier à servir à part, aucune police qui manque dans le cadre.
+- **Chromium dans l'image** (Playwright, environ 400 Mo) : le rendu est fidèle (flex, grid, `text-wrap`). Navigateur absent : l'aperçu marche, le PDF répond 503 avec une phrase claire, et les tests qui en ont besoin sautent au lieu d'échouer.
+- **« Rien ne déborde » se mesure.** Avant d'approuver, le navigateur compare le bas de chaque bloc au bas de sa page ; un débordement refuse l'approbation en nommant la page. Un contrôle à l'œil ne tient pas quand le texte vient d'une source.
+- **Imposition** : quatre pages A5 sur une A4 paysage (recto 4 | 1, verso 2 | 3), recto-verso « bord court ». Un essai à la main avant d'automatiser l'impression.
+
+## 17. Lire une source publique limitée (Wikipédia, 14/11/2026)
+
+- **User-Agent descriptif obligatoire** (nom de l'outil et adresse du dépôt) ; sans lui, « trop de requêtes » (429) dès les premières pages. Wikitext brut (`index.php?action=raw`) plutôt que l'API d'analyse : plus léger, et le même texte qu'un humain édite.
+- **Une pause entre deux pages, de nouveaux essais espacés après un 429, et un cache sans limite de durée** : le passé ne change pas. Une seule file de travail par appli, pour ne jamais lancer dix lectures de front.
+- **Plusieurs formats pour une même sorte de page** : les pages mensuelles ont changé de forme au fil des années (puces datées, puis une section par jour écrite de quatre façons). Un banc d'essai sur des dates tirées au hasard les trouve ; il devient les tests.
+- **Textes libres ou non** : une source en accès libre n'est pas forcément libre de droits. La garder pour un usage privé, sur le NAS, avec sa mention, et rien dans un dépôt public (ni texte, ni page en cache, ni fichier de test copié).
+- **Une requête SPARQL est une lecture envoyée en POST** (trop longue pour une adresse) : l'écrire en dur dans le client, et la preuve de lecture seule l'admet nommément.
+
+## 18. Ports (14/11/2026)
+
+- **Le port publié n'est pas le port du conteneur.** Un outil qui écoute sur 8099 dans son conteneur peut être publié sur un autre port du NAS, et un autre outil peut déjà publier 8099. Vérifier la colonne de gauche de `ports:` dans la stack, variables comprises (leur valeur est dans Portainer, pas dans le fichier).
+
 ## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.
