@@ -5,6 +5,9 @@ WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
+# 0.4 : les documents du socle (page « Documents ») sont lus au moment de compiler l'interface
+COPY docs/ /docs/
+COPY REPRISE.md CHANGELOG.md /
 RUN mkdir -p /app && npx vite build --outDir /app/static --emptyOutDir
 
 # ---------- Étape 2 : dépendances Python en roues ----------

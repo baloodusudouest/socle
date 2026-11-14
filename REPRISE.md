@@ -4,6 +4,7 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (14/11/2026)
 
+- **0.4.0** (14/11/2026) : page « Documents » (`frontend/src/pages/Documents.svelte`) ; les .md sont importés en `?raw` au moment de compiler. Une appli partie du socle retire cette page, comme « Composants ».
 - **0.3.2** (14/11/2026) : `docs/lecons.md` complété (§ 11 à 14), `docs/format.md` à jour (toujours sombre, couleurs des sept applis, adresses à jeton, relevé des écarts au § 7). Pas de changement de code.
 - **0.3.1** (13/11/2026) : toujours sombre (blocs `prefers-color-scheme: light` retirés, variante `dark:` partout).
 - **Version 0.3.0** (13/11/2026) : connexion commune (cookie `maison_session`, `Sessions.connecte`) ; [`docs/lecons.md`](docs/lecons.md), à lire avant de créer une appli ; `CHANGELOG.md`. La connexion commune est en service dans les sept applis maison (carnet, Millésime, vérification des dates, kit d'urgence, Transhumance, Sillage, l'Anneau).

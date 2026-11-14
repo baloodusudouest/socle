@@ -1,5 +1,9 @@
 # Journal des versions
 
+## 0.4.0 — 14 novembre 2026
+- **Page « Documents »** : le format commun, les leçons apprises, la reprise et ce journal, lisibles dans l'appli (onglets, sommaire sur PC). Ils sont lus dans le dépôt au moment de compiler l'interface : rien n'est cherché sur le réseau, et l'appli dit toujours ce que dit le dépôt de la version installée.
+- Nouvelle dépendance : `marked` (mise en forme du Markdown). Le Dockerfile copie `docs/`, `REPRISE.md` et `CHANGELOG.md` dans l'étape qui compile l'interface.
+
 ## 0.3.2 — 14 novembre 2026
 - **[`docs/lecons.md`](docs/lecons.md) complété** (§ 11 à 14) : comparer avec ce qu'un service a gardé (normalisation CardDAV), dater d'après un nom de dossier (lots écartés, fourchettes), regrouper un chemin de vie, relire sans tout relire, ce qu'une API de photos a appris ; un choix fait à la main contre les règles automatiques, réponses dans le désordre, gestes qui ne valent qu'une fois, page à jeton pour un écran mural, cartes de tableau de bord qui avalent les clics ; applis qui s'enchaînent sans jamais enchaîner une suppression ; tests sur un serveur de démonstration partagé.
 - **[`docs/format.md`](docs/format.md) mis à jour** : toujours sombre, couleurs des sept applis, règle des adresses à jeton (§ 3.1), et un relevé des écarts de chaque appli en service (§ 7).

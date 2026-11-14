@@ -72,7 +72,7 @@ Sur iPhone, dans un écran où l'on valide à la chaîne, la pilule s'efface pou
 ## 6. Partir du socle pour une nouvelle appli
 
 1. Copier ce dépôt, changer `APPLI` (`app/config.py`), le nom affiché et la couleur `--app` (`frontend/src/app.css`).
-2. Remplacer « Synthèse » par l'écran de travail ou par « À traiter » ; garder « Connexion » (`pages/Services.svelte`) et « Réglages ». Retirer « Composants ».
+2. Remplacer « Synthèse » par l'écran de travail ou par « À traiter » ; garder « Connexion » (`pages/Services.svelte`) et « Réglages ». Retirer « Composants » et « Documents ».
 3. Une tuile par service dans Connexion ; chaque route qui écrit commence par `exiger_ecriture(...)`.
 4. Écrire `docs/dossier.md`, `REPRISE.md`, `CHANGELOG.md`.
 

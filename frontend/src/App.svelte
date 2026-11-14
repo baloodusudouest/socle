@@ -9,16 +9,19 @@
   import Network from '@lucide/svelte/icons/network'
   import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal'
   import Shapes from '@lucide/svelte/icons/shapes'
+  import BookOpen from '@lucide/svelte/icons/book-open'
   import { api } from '$lib/api.js'
   import Connexion from './pages/Connexion.svelte'
   import Synthese from './pages/Synthese.svelte'
   import Services from './pages/Services.svelte'
   import Reglages from './pages/Reglages.svelte'
   import Composants from './pages/Composants.svelte'
+  import Documents from './pages/Documents.svelte'
 
   const onglets = [
     { page: 'synthese', nom: 'Synthèse', icone: LayoutGrid },
     { page: 'connexion', nom: 'Connexion', icone: Network },
+    { page: 'documents', nom: 'Documents', icone: BookOpen },
     { page: 'reglages', nom: 'Réglages', icone: SlidersHorizontal },
     { page: 'composants', nom: 'Composants', icone: Shapes },
   ]
@@ -90,7 +93,9 @@
       {/if}
       {#key page}
         <div in:fly={{ y: 6, duration: 180 }}>
-          {#if page === 'composants'}
+          {#if page === 'documents'}
+            <Documents />
+          {:else if page === 'composants'}
             <Composants />
           {:else if page === 'connexion'}
             <Services lectureSeule={session.lecture_seule} ondeconnecte={() => (connecte = false)} />
