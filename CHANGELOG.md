@@ -1,5 +1,8 @@
 # Journal des versions
 
+## 0.4.1 — 14 novembre 2026
+- `docs/lecons.md` : écran allumé seulement en HTTPS, carte du monde embarquée, page source écrasée par sa version compilée, icône du squelette à remplacer (appris en construisant Comptoir). Pas de changement de code.
+
 ## 0.4.0 — 14 novembre 2026
 - **Page « Documents »** : le format commun, les leçons apprises, la reprise et ce journal, lisibles dans l'appli (onglets, sommaire sur PC). Ils sont lus dans le dépôt au moment de compiler l'interface : rien n'est cherché sur le réseau, et l'appli dit toujours ce que dit le dépôt de la version installée.
 - Nouvelle dépendance : `marked` (mise en forme du Markdown). Le Dockerfile copie `docs/`, `REPRISE.md` et `CHANGELOG.md` dans l'étape qui compile l'interface.

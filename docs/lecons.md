@@ -98,6 +98,8 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 - **Animations** : toutes coupées par `prefers-reduced-motion`.
 - **Une règle CSS écrite deux fois** : la seconde gagne en silence. Modifier le bloc d'origine, ne pas en ajouter un plus bas.
 - **Noms** : première lettre en majuscule, jamais tout en capitales.
+- **Garder l'écran allumé** (l'API Wake Lock du navigateur, pour un écran de recette ou de cuisine) ne marche qu'en **HTTPS** : ouverte en http (par Tailscale, par exemple), l'appli ne peut pas l'obtenir. Le dire à l'écran plutôt que bricoler un repli (une vidéo muette en boucle) ; pour l'appareil qui en a besoin, une adresse HTTPS (Tailscale Serve).
+- **Carte du monde embarquée** (world-atlas, 110 m) : quelques pays n'ont pas d'identifiant. Une boucle Svelte indexée par l'identifiant plante (« each_key_duplicate ») : indexer par le rang.
 
 ## 6. Parler à un service extérieur
 
@@ -158,6 +160,8 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 | Un écran validé sur PC, rogné sur téléphone | Regarder sur un vrai téléphone avant de dire que c'est fini |
 | Une dépendance entre deux applis découverte au déploiement | Une première version autonome ; le lien avec l'autre appli vient après |
 | Un service ajouté à la stack avant d'avoir une image | Coder et publier d'abord, ajouter ensuite |
+| Une page source (`atlas.html` à la racine, entrée de Vite) écrasée par sa version compilée : la construction suivante échoue | Ne jamais recopier un fichier compilé sur une entrée ; vérifier les contrôles de GitHub après chaque envoi |
+| L'icône du squelette gardée par une appli copiée depuis une autre | Remplacer `icone.svg` et ses deux PNG dès la copie (liste du § 2) |
 
 ## 11. Données : comparer, dater, regrouper (ajouté le 14/11/2026)
 
