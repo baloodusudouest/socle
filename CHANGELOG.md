@@ -1,5 +1,8 @@
 # Journal des versions
 
+## 0.4.4 — 15 novembre 2026
+- `docs/format.md` § 7 : écart de Transhumance sur la navigation retiré (Transhumance 0.5.0 a la pilule en bas et sa page Réglages). Pas de changement de code.
+
 ## 0.4.3 — 14 novembre 2026
 - `docs/lecons.md` § 19 : envoi d'un gros fichier par morceaux avec reprise, tâche de fond qui reprend après un redémarrage, chiffres lus par Tesseract (liste blanche trompeuse, lecture libre de confirmation), service de lecture en ligne (une seule fonction, sortie douteuse, lecture seule), EPUB (liste des pages, repère de page, fichiers qui commencent à un titre, contrat avec l'appli lectrice), faux service remis en place après les tests ; § 15 : la première vraie donnée bat les données inventées (appris en construisant Scriptorium). Pas de changement de code.
 

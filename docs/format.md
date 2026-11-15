@@ -90,7 +90,6 @@ Comparaison des applis en service avec ce document. Rien n'est corrigé d'office
 | toutes | Le document disait « clair quand l'appareil le demande » ; toutes sont toujours sombres. **Corrigé ici.** | — |
 | toutes | Plusieurs ont des adresses à jeton que le § 3.1 ne prévoyait pas. **Règle ajoutée ici.** | — |
 | carnet, Sillage, l'Anneau | Trois ors voisins. **Tranché le 14/11/2026** : l'Anneau garde l'or, carnet passe en argent (2.18.2), Sillage en lavande (0.10.1). | — |
-| Transhumance | Deux entrées seulement (Migrer, Connexion), pas de Réglages : version et déconnexion sont dans Connexion. Sur téléphone, barre en haut au lieu de la pilule flottante en bas. | faible : outil d'une seule fois, à retirer de la stack après la migration |
 | Transhumance | Les demandes de Millésime arrivent dans Migrer, pas dans une tuile « À traiter ». | faible, même raison |
 | Sillage | Pas d'« À traiter » ; ce qui attend une décision est la tuile « À vérifier » dans Sillages. Pas de journal des écritures : Sillage n'écrit que dans sa propre base (corrections, récits, hôtes). | conforme à l'esprit (§ 2) |
 | l'Anneau | Pas de rail : l'écran d'ouverture est l'anneau lui-même ; pas d'écran « Connexion » des services, puisqu'il est lui-même la vue des services. Pas de mode lecture seule : il n'écrit chez aucun service. | voulu, écrit dans son dossier |
