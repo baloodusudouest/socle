@@ -1,5 +1,14 @@
 # Journal des versions
 
+## 0.5.0 — 16 novembre 2026
+- **Module commun `app/maison.py` (contrat 1)**, copié tel quel dans chaque appli par `tools/diffuser_maison.py` (empreinte en dernière ligne, vérifiée par le test de chaque appli). Bibliothèque standard seulement.
+  - `mot_de_passe(*anciens)` : `MAISON_PASSWORD`, sinon l'ancienne variable de l'appli.
+  - `lecture_seule(propre)` : `MAISON_LECTURE_SEULE` pour toute la maison ; la variable de l'appli, si elle dit oui ou non, l'emporte (essai d'une seule appli). `origine_lecture_seule` pour l'écran Réglages.
+  - `jetons(*anciens)`, `jeton_valide`, `jeton_propose`, `jeton_a_envoyer` : jeton commun `MAISON_JETON` entre applis maison, `MAISON_JETON_ANCIEN` pendant un changement, anciens jetons par paire acceptés pendant la transition ; comparaison en temps constant ; vide = porte fermée. Home Assistant et le PC de calcul gardent leurs propres jetons.
+  - `Annuaire` : adresses des autres services lues dans l'Anneau (`GET /externe/services`, jeton commun, `MAISON_ANNEAU_URL`), gardées dix minutes, adresse privée (Tailscale) quand la page vient de là (`est_prive`), repli sinon.
+- Le socle lui-même lit `MAISON_PASSWORD` et `MAISON_LECTURE_SEULE` (repli sur `APP_PASSWORD`, `APP_LECTURE_SEULE`).
+- `docs/lecons.md` § 20 : variables communes. Tests : 15 (dont 6 pour le module).
+
 ## 0.4.4 — 15 novembre 2026
 - `docs/format.md` § 7 : écart de Transhumance sur la navigation retiré (Transhumance 0.5.0 a la pilule en bas et sa page Réglages). Pas de changement de code.
 

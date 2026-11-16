@@ -2,8 +2,9 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
-## État (14/11/2026)
+## État (16/11/2026)
 
+- **0.5.0** (16/11/2026) : module commun `app/maison.py` (contrat 1 : `MAISON_PASSWORD`, `MAISON_JETON`, `MAISON_LECTURE_SEULE`, annuaire de l'Anneau) ; `tools/diffuser_maison.py` le signe et le copie dans les applis. Chantier « variables rationalisées » (dossier dans le projet Claude : `maison-variables-sauvegarde-dossier.md`).
 - **0.4.3** (14/11/2026) : `docs/lecons.md` § 19, appris en construisant Scriptorium (gros fichiers, Tesseract, lecture en ligne, EPUB). Pas de changement de code.
 - **0.4.0** (14/11/2026) : page « Documents » (`frontend/src/pages/Documents.svelte`) ; les .md sont importés en `?raw` au moment de compiler. Une appli partie du socle retire cette page, comme « Composants ».
 - **0.3.2** (14/11/2026) : `docs/lecons.md` complété (§ 11 à 14), `docs/format.md` à jour (toujours sombre, couleurs des sept applis, adresses à jeton, relevé des écarts au § 7). Pas de changement de code.

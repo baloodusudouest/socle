@@ -267,6 +267,15 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 
 **Tests** : un serveur de démonstration qui remplace une fonction (un faux service de lecture) doit la remettre en place après usage. Sinon, les tests qui passent après lui voient le faux.
 
+## 20. Variables communes de la maison (16/11/2026)
+
+- **Le module `app/maison.py` se copie, il ne se modifie pas.** Référence dans le socle ; `python tools/diffuser_maison.py ../appli` le signe et le copie. Le test de l'appli recalcule l'empreinte (`maison.empreinte_calculee() == maison.empreinte_ecrite()`) : une retouche locale fait échouer les tests. Un changement se fait dans le socle, puis se rediffuse.
+- **Toujours un repli sur l'ancien nom** : `maison.mot_de_passe("APPLI_PASSWORD")`, `maison.jetons("ANCIEN_JETON")`. L'appli marche avant et après la bascule de la stack ; les anciens noms se retirent à la fin du chantier.
+- **Lecture seule** : `maison.lecture_seule("APPLI_LECTURE_SEULE")`. La variable de l'appli, si elle dit oui ou non, l'emporte sur `MAISON_LECTURE_SEULE` ; l'écran Réglages dit d'où vient la lecture seule (`origine_lecture_seule`).
+- **Jeton commun** pour les échanges entre applis maison (`MAISON_JETON`, en-tête `Authorization: Bearer`). Pendant un changement de jeton, l'ancien va dans `MAISON_JETON_ANCIEN`. Home Assistant et le PC de calcul gardent leurs jetons propres : ils sont hors de la stack.
+- **Adresses des autres applis** : jamais une IP plus un port codés dans l'appli. `maison.Annuaire().adresse("Sillage", prive=maison.est_prive(hote), repli=...)` les lit dans l'Anneau, qui connaît l'adresse locale et l'adresse privée de chaque tuile ; l'adresse privée sert quand la page a été ouverte par Tailscale.
+- **Bibliothèque standard seulement** dans ce module : il entre dans toutes les applis sans changer leurs dépendances.
+
 ## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.

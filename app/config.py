@@ -5,6 +5,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import maison
+
 APPLI = "socle"
 
 
@@ -18,12 +20,14 @@ class Config:
 
 
 def charger() -> Config:
-    mot_de_passe = os.environ.get("APP_PASSWORD", "")
+    # 0.5.0 : variables communes de la maison (app/maison.py), avec repli sur les anciennes
+    mot_de_passe = maison.mot_de_passe("APP_PASSWORD")
     if len(mot_de_passe) < 12:
-        raise SystemExit("APP_PASSWORD est absent ou trop court (12 caractères au moins) : le socle ne démarre pas.")
+        raise SystemExit("MAISON_PASSWORD (ou APP_PASSWORD) est absent ou trop court (12 caractères au moins) : "
+                         "le socle ne démarre pas.")
     return Config(
         password=mot_de_passe,
         data=Path(os.environ.get("APP_DATA", "/data")),
         static=Path(__file__).parent / "static",
-        lecture_seule=os.environ.get("APP_LECTURE_SEULE", "").strip().lower() in ("oui", "1", "true", "yes"),
+        lecture_seule=maison.lecture_seule("APP_LECTURE_SEULE"),
     )
