@@ -44,6 +44,8 @@ def test_jeton_commun_ancien_et_rotation(monkeypatch):
     ok = maison.jetons("ANCIEN_JETON_PAIRE")
     assert all(maison.jeton_valide(j, ok) for j in ("jeton-commun-neuf", "jeton-commun-vieux", "jeton-de-la-paire"))
     assert not maison.jeton_valide("autre", ok) and not maison.jeton_valide("", ok)
+    assert maison.jeton_a_envoyer("ANCIEN_JETON_PAIRE") == "jeton-de-la-paire"     # transition : l'ancien d'abord
+    monkeypatch.delenv("ANCIEN_JETON_PAIRE")
     assert maison.jeton_a_envoyer("ANCIEN_JETON_PAIRE") == "jeton-commun-neuf"
     assert maison.jeton_propose({"authorization": "Bearer abc"}) == "abc"
     assert maison.jeton_propose({"x-maison-jeton": "def"}) == "def"
