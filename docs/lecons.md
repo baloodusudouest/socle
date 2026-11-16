@@ -33,7 +33,7 @@ Puis renommer, partout où le mot « socle » ou le préfixe `APP_` apparaît :
 
 | Fichier | Ce qui change |
 |---|---|
-| `app/config.py` | nom de l'appli, préfixe des variables (`MONAPPLI_PASSWORD`, `MONAPPLI_DATA`…), variables propres |
+| `app/config.py` | nom de l'appli, préfixe des variables propres (`MONAPPLI_DATA`, `MONAPPLI_LECTURE_SEULE`…) ; le mot de passe est `MAISON_PASSWORD`, commun (`maison.mot_de_passe()`) ; les réglages d'usage vont dans `REGLAGES_DEFAUTS` (`app/main.py`), pas dans une variable |
 | `app/__init__.py` | version |
 | `Dockerfile` | étiquettes, variables, port exposé, port du contrôle de santé |
 | `entrypoint.sh` | variables et port |
@@ -270,11 +270,21 @@ clé    = SHA256("maison-session|" + mot de passe commun)
 ## 20. Variables communes de la maison (16/11/2026)
 
 - **Le module `app/maison.py` se copie, il ne se modifie pas.** Référence dans le socle ; `python tools/diffuser_maison.py ../appli` le signe et le copie. Le test de l'appli recalcule l'empreinte (`maison.empreinte_calculee() == maison.empreinte_ecrite()`) : une retouche locale fait échouer les tests. Un changement se fait dans le socle, puis se rediffuse.
-- **Toujours un repli sur l'ancien nom** : `maison.mot_de_passe("APPLI_PASSWORD")`, `maison.jetons("ANCIEN_JETON")`. L'appli marche avant et après la bascule de la stack ; les anciens noms se retirent à la fin du chantier.
+- **Toujours un repli sur l'ancien nom** : `maison.mot_de_passe("APPLI_PASSWORD")`, `maison.jetons("ANCIEN_JETON")`. L'appli marche avant et après la bascule de la stack ; les anciens noms se retirent à la fin du chantier. Fin du chantier le 16/11/2026 (contrat 2) : les applis appellent `maison.mot_de_passe()`, `maison.jetons()` et `maison.jeton_a_envoyer()` sans ancien nom ; seule la variable de lecture seule propre à l'appli reste (forçage).
 - **Lecture seule** : `maison.lecture_seule("APPLI_LECTURE_SEULE")`. La variable de l'appli, si elle dit oui ou non, l'emporte sur `MAISON_LECTURE_SEULE` ; l'écran Réglages dit d'où vient la lecture seule (`origine_lecture_seule`).
 - **Jeton commun** pour les échanges entre applis maison (`MAISON_JETON`, en-tête `Authorization: Bearer`). Pendant un changement de jeton, l'ancien va dans `MAISON_JETON_ANCIEN`. Home Assistant et le PC de calcul gardent leurs jetons propres : ils sont hors de la stack.
 - **Adresses des autres applis** : jamais une IP plus un port codés dans l'appli. `maison.Annuaire().adresse("Sillage", prive=maison.est_prive(hote), repli=...)` les lit dans l'Anneau, qui connaît l'adresse locale et l'adresse privée de chaque tuile ; l'adresse privée sert quand la page a été ouverte par Tailscale.
 - **Bibliothèque standard seulement** dans ce module : il entre dans toutes les applis sans changer leurs dépendances.
+
+## 21. Réglages d'usage dans l'appli, sauvegarde sans secret (16/11/2026)
+
+- **Un réglage d'usage vit dans l'appli, pas dans la stack.** La stack dit comment l'appli est installée (mot de passe, jetons, dossiers, lecture seule) ; ce qu'on règle en s'en servant se change dans l'écran Réglages, sans redéployer. `maison.Reglages` garde un fichier JSON dans le dossier de données, écrit de façon atomique (fichier temporaire puis remplacement) ; un fichier abîmé redonne les valeurs par défaut au lieu d'empêcher le démarrage.
+- **La variable n'est reprise qu'une fois.** Au premier démarrage où une clé manque dans le fichier, sa valeur vient de l'ancienne variable si elle est posée ; ensuite la variable n'est plus lue, même si elle reste dans la stack. Sinon on ne sait jamais qui fait foi, la stack ou l'écran. Une ligne au journal par reprise, avec le nom et sans la valeur.
+- **Le type du défaut est le type du réglage.** `True` fait un oui/non, `3` un entier, `[]` une liste ; l'écran envoie des valeurs typées et un mauvais type répond 400 sans rien changer. Une route attrape `ValueError` **et** `TypeError` (une valeur vide pour un entier lève `TypeError`).
+- **Une sauvegarde ne contient jamais de secret.** `maison.est_secret()` écarte tout nom qui ressemble à un secret, et chaque appli écrit sa liste d'exclusions même vide. Le filtre se trompe exprès dans le sens prudent : un réglage écarté par erreur se renomme. La porte `/externe/sauvegarde` s'ouvre au seul jeton commun ; la session ne suffit pas ; jeton vide, porte fermée.
+- **Restaurer montre avant d'écrire.** Une date, la liste « actuel → sauvegardé », puis une confirmation. Ce qui n'a plus le bon type (réglage changé entre deux versions) est ignoré et nommé ; le reste s'applique. L'Anneau injoignable se dit en une phrase, sans erreur de page.
+- **Déploiement en deux temps.** D'abord la nouvelle image avec la stack actuelle (les réglages sont repris des anciennes variables au premier démarrage), vérifier Réglages, puis la nouvelle stack sans les anciennes lignes. Dans l'autre ordre, les valeurs sont perdues sans bruit : le réglage prend son défaut.
+- **Tests sans réseau** : l'Anneau se remplace par l'argument `lire=` de `maison.lire_sauvegarde` (dans le socle, `ETAT["lire_anneau"]`). Un faux Anneau qui sait répondre une date, une date inconnue (404) et une panne (`URLError`) couvre tous les messages de l'écran.
 
 ## 15. Ce qui reste vrai d'une appli à l'autre
 

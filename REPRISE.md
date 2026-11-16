@@ -4,13 +4,21 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (16/11/2026)
 
+- **0.6.0** (16/11/2026) : chantier B « réglages dans l'appli, sauvegarde et restauration » et nettoyage des anciens noms.
+  - `app/maison.py` passe au **contrat 2** (`Reglages`, `est_secret`, `reglages_publics`, `sauvegarde`, `differences`, `lire_sauvegarde`) ; signé par `python tools/diffuser_maison.py` (sans argument) ; déjà copié dans les applis.
+  - Implémentation de référence : `app/main.py` (`REGLAGES_DEFAUTS`, `REGLAGES_VARIABLES`, `EXCLUS_SAUVEGARDE`, routes `/api/reglages`, `/externe/sauvegarde`, `/api/restaurer`), `frontend/src/pages/Reglages.svelte` (tuiles « Réglages » et « Restaurer les réglages »), `pages/Synthese.svelte` (les deux réglages de démonstration y jouent). Fichier `reglages.json` dans `/data`.
+  - Réglages : `message_accueil` (texte, défaut vide, repris une fois de `APP_MESSAGE_ACCUEIL`), `afficher_mesures` (oui/non, défaut oui). Aucune clé exclue de la sauvegarde (`EXCLUS_SAUVEGARDE = ()`, liste explicite).
+  - Variables lues : `MAISON_PASSWORD`, `MAISON_JETON`, `MAISON_JETON_ANCIEN`, `MAISON_LECTURE_SEULE`, `APP_LECTURE_SEULE` (forçage), `MAISON_ANNEAU_URL` (facultatif), `APP_DATA`, `APP_PORT` ; `APP_MESSAGE_ACCUEIL` au premier démarrage seulement. **`APP_PASSWORD` n'est plus lu.**
+  - Tests : `tests/test_maison.py` (contrat 2 complet), `tests/test_reglages.py` (API), `tests/test_ecran.py` (Réglages et Restaurer sur PC et iPhone ; la CI compile l'interface et installe Chromium).
+  - **Déploiement en deux temps** : d'abord la nouvelle image avec la stack actuelle (les réglages sont repris des anciennes variables au premier démarrage), vérifier Réglages, puis la nouvelle stack sans les anciennes lignes. Pour le socle : ajouter `MAISON_JETON` (sinon l'Anneau ne peut pas lire la sauvegarde) et vérifier que `MAISON_PASSWORD` est rempli **avant** de retirer la ligne `APP_PASSWORD` : sans lui, le conteneur ne démarre plus.
+  - **Jamais essayé sur la vraie installation** : ni la reprise, ni la collecte par l'Anneau, ni Restaurer contre le vrai Anneau (seulement contre un faux, dans les tests).
 - **0.5.0** (16/11/2026) : module commun `app/maison.py` (contrat 1 : `MAISON_PASSWORD`, `MAISON_JETON`, `MAISON_LECTURE_SEULE`, annuaire de l'Anneau) ; `tools/diffuser_maison.py` le signe et le copie dans les applis. Chantier « variables rationalisées » (dossier dans le projet Claude : `maison-variables-sauvegarde-dossier.md`).
 - **0.4.3** (14/11/2026) : `docs/lecons.md` § 19, appris en construisant Scriptorium (gros fichiers, Tesseract, lecture en ligne, EPUB). Pas de changement de code.
 - **0.4.0** (14/11/2026) : page « Documents » (`frontend/src/pages/Documents.svelte`) ; les .md sont importés en `?raw` au moment de compiler. Une appli partie du socle retire cette page, comme « Composants ».
 - **0.3.2** (14/11/2026) : `docs/lecons.md` complété (§ 11 à 14), `docs/format.md` à jour (toujours sombre, couleurs des sept applis, adresses à jeton, relevé des écarts au § 7). Pas de changement de code.
 - **0.3.1** (13/11/2026) : toujours sombre (blocs `prefers-color-scheme: light` retirés, variante `dark:` partout).
 - **Version 0.3.0** (13/11/2026) : connexion commune (cookie `maison_session`, `Sessions.connecte`) ; [`docs/lecons.md`](docs/lecons.md), à lire avant de créer une appli ; `CHANGELOG.md`. La connexion commune est en service dans les sept applis maison (carnet, Millésime, vérification des dates, kit d'urgence, Transhumance, Sillage, l'Anneau).
-- Le socle a un mot de passe depuis la 0.1.0 (`APP_PASSWORD`, douze caractères au moins). Dans la stack, il reçoit désormais le même mot de passe que les autres applis, sans quoi la connexion commune ne joue pas.
+- Le socle a un mot de passe depuis la 0.1.0 (`APP_PASSWORD` jusqu'à la 0.5.0, `MAISON_PASSWORD` seul depuis la 0.6.0, douze caractères au moins). Il reçoit le même mot de passe que les autres applis, sans quoi la connexion commune ne joue pas.
 - **Version 0.2.0** (11/11/2026) : le format commun, éprouvé sur carnet, Millésime et la vérification des dates, est écrit dans [`docs/format.md`](docs/format.md) ; le squelette gagne « Connexion », « Réglages », le mode lecture seule et les neutres chauds. 8 tests verts.
 - Version 0.1.0 : squelette de test, image construite par GitHub Actions et publiée sur ghcr.io.
 - **Déployé sur le NAS le 11/11/2026** dans homelab.yml (port 8090, volume `${DOCKER_ROOT}/socle`, variable `APPS_PASSWORD`). Vérifié sur place : connexion, synthèse en tuiles avec graphique, écriture dans /data.
@@ -26,7 +34,8 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 - Svelte 5 + Vite 6 sans SvelteKit, comme carnet et Millésime.
 - shadcn-svelte, style « nova ». Les composants sont copiés dans le dépôt, pas installés.
 - Sombre par défaut ; le clair suit le réglage de l'appareil, sans bouton dans l'appli.
-- Un mot de passe commun à toutes les applis (`APPS_PASSWORD`), SSO plus tard avec l'Anneau unique.
+- Un mot de passe commun à toutes les applis (`MAISON_PASSWORD` depuis le 16/11/2026), connexion commune par le cookie de l'Anneau.
+- Les réglages d'usage vivent dans l'appli (écran Réglages), pas dans la stack ; l'Anneau en garde une copie chaque nuit (16/11/2026).
 - Connexion reprise de carnet (cookie signé, génération écrite dans /data).
 - Animations : transitions natives de Svelte ; motion.dev seulement pour Frise.
 
@@ -37,7 +46,9 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 - Le registre shadcn-svelte.com n'est pas joignable depuis l'environnement de Claude : utiliser `tools/shadcn-local.mjs`.
 - Les sources shadcn-svelte utilisent des classes abstraites `cn-…` ; elles ne marchent pas copiées telles quelles, il faut passer par l'outil ou la commande officielle.
 - Le graphique (LayerChart) pèse lourd : l'interface fait 562 Ko (172 Ko compressée), contre quelques dizaines sans lui. À charger à la demande dans une appli qui n'affiche pas de graphique dès l'accueil.
-- `APP_PASSWORD` de moins de 12 caractères : le conteneur s'arrête au démarrage, voir ses journaux dans Portainer.
+- `MAISON_PASSWORD` absent ou de moins de 12 caractères : le conteneur s'arrête au démarrage, voir ses journaux dans Portainer. L'ancien `APP_PASSWORD` ne suffit plus (0.6.0).
+- Retirer de la stack une variable de réglage **avant** le premier démarrage de la nouvelle image fait perdre sa valeur : déploiement en deux temps.
+- `maison.est_secret` écarte aussi des noms innocents (`boucle`, `max_articles`, `user_agent`) : un réglage absent de la sauvegarde se renomme.
 
 ## Non-objectifs
 

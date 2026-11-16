@@ -1,5 +1,14 @@
 # Journal des versions
 
+## 0.6.0 — 16 novembre 2026
+- **Module commun `app/maison.py`, contrat 2** : réglages d'usage (`Reglages` : fichier JSON dans le dossier de données, reprise de l'ancienne variable une seule fois au premier démarrage, écriture atomique), `est_secret`, `reglages_publics`, `sauvegarde`, `differences`, `lire_sauvegarde`, contrat de sauvegarde 1. Déjà copié dans les applis maison.
+- **Réglages dans l'appli** (modèle pour toutes les applis) : deux réglages de démonstration, « Message d'accueil » (texte, repris une fois de `APP_MESSAGE_ACCUEIL`) et « Graphique des appels » (oui/non) ; ils changent la Synthèse. `GET`/`PUT /api/reglages` ; un mauvais type répond 400 avec un message clair.
+- **Sauvegarde pour l'Anneau** : `GET /externe/sauvegarde`, ouverte seulement par le jeton commun (`MAISON_JETON`), fermée s'il est vide ; réglages et version seulement, jamais de secret.
+- **Restaurer les réglages** : nouvelle tuile dans Réglages ; on choisit une date gardée par l'Anneau, on voit les différences (avant → sauvegardé), on confirme. Anneau injoignable : un message clair. Permis même en lecture seule (ce sont les réglages de l'appli).
+- **Anciens noms retirés** : `APP_PASSWORD` n'est plus lu, seulement `MAISON_PASSWORD`. `APP_LECTURE_SEULE` reste (forçage pour le socle seul), à côté de `MAISON_LECTURE_SEULE`. L'écran dit d'où vient la lecture seule.
+- `docs/format.md` § 8 (motif Réglages et Restaurer, routes, contrat de sauvegarde 1, déploiement en deux temps) ; `docs/lecons.md` § 21.
+- Tests : 109, dont les tests d'écran sur PC et iPhone (Playwright), désormais lancés aussi par GitHub Actions.
+
 ## 0.5.0 — 16 novembre 2026
 - **Module commun `app/maison.py` (contrat 1)**, copié tel quel dans chaque appli par `tools/diffuser_maison.py` (empreinte en dernière ligne, vérifiée par le test de chaque appli). Bibliothèque standard seulement.
   - `mot_de_passe(*anciens)` : `MAISON_PASSWORD`, sinon l'ancienne variable de l'appli.

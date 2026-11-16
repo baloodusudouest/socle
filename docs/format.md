@@ -2,7 +2,7 @@
 
 Écrit le 11/11/2026, après l'avoir appliqué trois fois le même jour : carnet (2.9 et 2.10), Millésime (2.0) et la vérification des dates (2.0). Ce document dit ce qui a marché, ce que les conseils ont corrigé, et ce qu'une nouvelle appli doit reprendre.
 
-Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour le 14/11/2026 : toujours sombre, couleurs de toutes les applis, adresses à jeton, écarts relevés (§ 7).
+Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour le 14/11/2026 : toujours sombre, couleurs de toutes les applis, adresses à jeton, écarts relevés (§ 7). Mis à jour le 16/11/2026 : réglages dans l'appli, sauvegarde et restauration (§ 8).
 
 ## 1. Ce qu'on retrouve dans chaque appli
 
@@ -12,7 +12,7 @@ Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour l
 | **Entrées** | Peu : entre quatre et six. Toujours **Connexion** et **Réglages** ; presque toujours **À traiter** |
 | **À traiter** | Une grille de tuiles, une par type de chose à faire, avec son nombre. Une tuile ouvre sa liste. Le compteur de l'onglet ne compte que ce qui attend une décision |
 | **Connexion** | Une tuile par service extérieur, avec un voyant. Le service ouvert dit ce que l'appli y lit et y écrit, et porte ses gestes : **Vérifier** (compare, n'écrit rien) et **Synchroniser** (écrit ce qui est sûr, envoie le reste dans À traiter) |
-| **Réglages** | Ce qui n'est pas un service : règles, journal des écritures avec Annuler, version, déconnexion |
+| **Réglages** | Ce qui n'est pas un service : réglages d'usage, « Restaurer les réglages », règles, journal des écritures avec Annuler, version, déconnexion (motif au § 8) |
 | **Habillage** | Fonds neutres chauds, filets fins, **toujours sombre** (depuis le 13/11/2026 : le thème clair est retiré, quel que soit le réglage de l'appareil, pour que toutes les applis se ressemblent ouvertes seules ou dans l'Anneau). Inter. Titres d'écran grands et fins |
 | **Couleur** | Une par appli. Elle porte l'action attendue (un seul bouton plein par bloc), l'onglet actif, les compteurs |
 | **Signature** | Chaque appli garde ce qui la distingue (l'anneau de progression de carnet, l'année en Bodoni de Millésime) |
@@ -77,7 +77,8 @@ Sur iPhone, dans un écran où l'on valide à la chaîne, la pilule s'efface pou
 1. Copier ce dépôt, changer `APPLI` (`app/config.py`), le nom affiché et la couleur `--app` (`frontend/src/app.css`).
 2. Remplacer « Synthèse » par l'écran de travail ou par « À traiter » ; garder « Connexion » (`pages/Services.svelte`) et « Réglages ». Retirer « Composants » et « Documents ».
 3. Une tuile par service dans Connexion ; chaque route qui écrit commence par `exiger_ecriture(...)`.
-4. Écrire `docs/dossier.md`, `REPRISE.md`, `CHANGELOG.md`.
+4. Remplacer les deux réglages de démonstration (`REGLAGES_DEFAUTS`, `REGLAGES_VARIABLES`, `EXCLUS_SAUVEGARDE` dans `app/main.py`, table `NOMS` dans `pages/Reglages.svelte`) par ceux de l'appli ; garder les routes de sauvegarde et de restauration telles quelles (§ 8).
+5. Écrire `docs/dossier.md`, `REPRISE.md`, `CHANGELOG.md`.
 
 Note : carnet, Millésime et la vérification des dates n'utilisent pas shadcn-svelte (classes écrites à la main, mêmes valeurs). Le socle le garde pour les applis neuves ; les deux façons donnent le même rendu.
 
@@ -99,3 +100,51 @@ Comparaison des applis en service avec ce document. Rien n'est corrigé d'office
 
 Ce qui est partout conforme : mot de passe commun et cookie commun (les sept applis), `/health`, Watchtower désactivé pour celles qui écrivent, `REPRISE.md`, `CHANGELOG.md`, `docs/dossier.md`, icône et manifeste, Inter, tests d'écran sur deux tailles.
 
+## 8. Réglages et Restaurer (16/11/2026, contrat de sauvegarde 1)
+
+Choix du 16/11/2026 : les **réglages d'usage** (ce qu'on change en se servant de l'appli : un seuil, un nom d'album, une heure, une liste d'exclusions) quittent la stack pour l'écran Réglages. La stack ne garde que l'installation : mot de passe, jetons, dossiers, adresses, lecture seule. L'Anneau garde chaque nuit une copie des réglages de chaque appli ; chaque appli sait relire une copie et l'appliquer. Modèle complet dans le socle (0.6.0) : `app/main.py`, `pages/Reglages.svelte`, `tests/test_reglages.py`, `tests/test_ecran.py`.
+
+### Où vivent les réglages
+
+- Dans l'appli : `maison.Reglages(<données>/reglages.json, defauts, variables)`. Le **type de la valeur par défaut** fixe le type du réglage (oui/non, entier, décimal, liste, texte). Une appli qui a déjà sa table de réglages la garde et l'expose en dictionnaire.
+- `variables` donne, pour chaque clé, l'**ancienne variable de la stack** : elle est lue une seule fois, au premier démarrage où la clé manque dans le fichier (reprise), puis plus jamais. Chaque reprise laisse une ligne au journal (le nom de la clé et de la variable, pas la valeur).
+- Changer un réglage ou en restaurer un est **permis en lecture seule** : la lecture seule protège les services extérieurs, pas les réglages de l'appli.
+
+### Écran
+
+Deux tuiles dans Réglages, au-dessus de la version et de la déconnexion :
+
+| Tuile | Contenu |
+|---|---|
+| **Réglages** | Un champ par réglage (texte, interrupteur `role="switch"` pour oui/non, nombre, liste). Un seul bouton plein, « Enregistrer », inactif tant que rien n'a changé. Message en ligne : « Réglages enregistrés. » ou la raison du refus |
+| **Restaurer les réglages** | Une liste des dates gardées par l'Anneau (la plus récente choisie), la liste des différences « valeur actuelle → valeur sauvegardée » avec le nom affiché du réglage, puis « Restaurer » → « Remplacer N réglages ? Confirmer / Annuler ». Anneau injoignable ou rien de sauvegardé : une phrase claire et « Réessayer », jamais une erreur de page |
+
+### Routes
+
+| Route | Porte | Réponse |
+|---|---|---|
+| `GET /api/reglages` | session | `{"reglages": {…}}` |
+| `PUT /api/reglages` | session | `{clé: valeur}` ; clés inconnues ignorées ; mauvais type → **400** avec un message clair, rien n'est changé |
+| `GET /externe/sauvegarde` | **jeton commun** (`MAISON_JETON`, ou `MAISON_JETON_ANCIEN` pendant un changement) ; `MAISON_JETON` vide → **404** (porte fermée) ; mauvais jeton → 401. La session ne suffit pas | `maison.sauvegarde("<nom du dépôt>", __version__, reglages, exclus=…)` |
+| `GET /api/restaurer` | session | `{"dates": ["AAAA-MM-JJ", …]}` |
+| `GET /api/restaurer?le=AAAA-MM-JJ` | session | `{"le", "version", "differences": [{"cle", "actuel", "sauve"}]}` |
+| `POST /api/restaurer` `{"le": …}` | session | applique les différences, une ligne au journal ; `{"le", "appliques", "ignores", "reglages"}` |
+
+Le middleware de session ne garde que `/api/…` : `/externe/…` vérifie son jeton dans la route. Les erreurs de l'Anneau deviennent 404 (aucune sauvegarde ce jour-là) ou 503 (« L'Anneau ne répond pas »). Une valeur sauvegardée qui n'a plus le bon type (réglage changé de type entre deux versions) est ignorée et nommée, les autres s'appliquent.
+
+### Contrat de sauvegarde 1
+
+```
+{"contrat": 1, "appli": "<nom du dépôt>", "version": "X.Y.Z", "le": "<date ISO avec fuseau>",
+ "reglages": {<réglages d'usage publics>}}
+```
+
+- **Jamais de secret** : `maison.est_secret()` écarte tout nom qui contient un mot de secret (password, jeton, token, cle, key, code, webhook, user, email…) ; elle se trompe exprès dans le sens prudent (`boucle`, `max_articles` sont aussi écartés : choisir un autre nom de clé).
+- **Exclusions explicites** : `EXCLUS_SAUVEGARDE`, une liste écrite même vide, pour un réglage qui contient un chemin personnel, un nom de proche, une adresse.
+- Ni variable de la stack, ni chemin de dossier, ni valeur dérivée : seulement ce que l'utilisateur règle.
+- L'Anneau lit `GET /externe/sauvegarde` chaque nuit et rend `GET /externe/sauvegardes/<appli>[?le=…]` ; l'appli le lit par `maison.lire_sauvegarde(appli, le)`. Pas de notification Home Assistant : un échec de collecte se voit dans la tuile « À traiter » de l'Anneau.
+
+### Déploiement en deux temps
+
+1. Nouvelle image **avec la stack actuelle** : au premier démarrage, chaque réglage est repris de son ancienne variable. Vérifier l'écran Réglages.
+2. Nouvelle stack **sans les anciennes lignes** de réglage. Retirer une ligne avant le premier démarrage ferait perdre sa valeur (le réglage prendrait sa valeur par défaut).

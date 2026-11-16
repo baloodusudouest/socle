@@ -1,6 +1,7 @@
 <script>
   // Écran de synthèse en tuiles bento. Toutes les valeurs viennent de /api/synthese :
   // ce sont les vraies mesures du conteneur, pas des exemples.
+  // 0.6.0 : deux réglages de démonstration (écran Réglages) : le message d'accueil et le graphique des appels.
   import { onMount } from 'svelte'
   import { scaleBand } from 'd3-scale'
   import { BarChart } from 'layerchart'
@@ -13,6 +14,7 @@
   let { ondeconnecte } = $props()
   let s = $state(null)
   let erreur = $state('')
+  let reglages = $state({ message_accueil: '', afficher_mesures: true })
 
   const graphique = { appels: { label: 'Appels', color: 'var(--chart-1)' } }
 
@@ -27,6 +29,7 @@
   }
 
   onMount(() => {
+    api.get('/api/reglages').then((r) => (reglages = r.reglages)).catch(() => { /* défauts */ })
     lire()
     const id = setInterval(lire, 15000)
     return () => clearInterval(id)
@@ -49,6 +52,10 @@
   {#if s}<Badge variant="outline">v{s.version}</Badge>{/if}
 </header>
 
+{#if reglages.message_accueil}
+  <p class="mb-4 text-lg font-light">{reglages.message_accueil}</p>
+{/if}
+
 {#if erreur}
   <p class="rounded-xl border border-destructive/40 p-4 text-sm text-destructive" role="alert">
     Lecture impossible : {erreur} Nouvel essai dans 15 secondes.
@@ -57,6 +64,7 @@
   <p class="text-sm text-muted-foreground">Lecture des mesures…</p>
 {:else}
   <div class="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+    {#if reglages.afficher_mesures}
     <Tuile etiquette="Appels à l'API, 12 dernières minutes" class="col-span-2 md:row-span-2">
       <Chart.Container config={graphique} class="aspect-auto h-44 w-full md:h-full md:min-h-56">
         <BarChart
@@ -73,6 +81,7 @@
         </BarChart>
       </Chart.Container>
     </Tuile>
+    {/if}
 
     <Tuile etiquette="Appels servis" accent>
       <p class="chiffre text-5xl">{s.appels_total.toLocaleString('fr-FR')}</p>

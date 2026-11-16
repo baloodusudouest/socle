@@ -1,5 +1,8 @@
 # Service socle à placer dans la stack homelab.yml (Portainer).
 # Les variables viennent des « Environment variables » de la stack (voir .env.example).
+# 0.6.0 : seules les variables d'installation restent ici. Les réglages d'usage (message d'accueil, graphique des
+# appels) se règlent dans l'écran Réglages de l'appli ; APP_MESSAGE_ACCUEIL, si elle est encore dans la stack,
+# n'est lue qu'une fois, au premier démarrage de la 0.6.0, pour reprendre sa valeur. Elle peut ensuite être retirée.
 services:
   socle:
     image: ghcr.io/baloodusudouest/socle:${SOCLE_VERSION:-latest}
@@ -9,7 +12,10 @@ services:
       - "${PORT_SOCLE:-8090}:8090"          # réseau local et Tailscale uniquement
     environment:
       - TZ=Europe/Paris
-      - APP_PASSWORD=${APPS_PASSWORD}       # mot de passe commun à toutes les applis
-      - APP_LECTURE_SEULE=${APP_LECTURE_SEULE:-}   # « oui » : lecture seule
+      - MAISON_PASSWORD=${MAISON_PASSWORD}                 # mot de passe commun à toutes les applis (12 caractères au moins)
+      - MAISON_JETON=${MAISON_JETON:-}                     # jeton commun : l'Anneau lit /externe/sauvegarde ; vide = porte fermée
+      - MAISON_LECTURE_SEULE=${MAISON_LECTURE_SEULE:-}     # « oui » : aucune appli n'écrit hors de chez elle
+      - APP_LECTURE_SEULE=${APP_LECTURE_SEULE:-}           # forçage pour le socle seul : « oui » ou « non » l'emporte
+      # - MAISON_ANNEAU_URL=http://anneau:8094             # facultatif : adresse de l'Anneau dans la stack (défaut)
     volumes:
-      - ${SOCLE_DATA_DIR}:/data             # état de l'appli (ici : un seul petit fichier)
+      - ${SOCLE_DATA_DIR}:/data             # état de l'appli : génération des sessions, reglages.json

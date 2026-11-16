@@ -8,5 +8,5 @@ export default defineConfig({
   plugins: [svelte(), tailwindcss()],
   resolve: { alias: { $lib: fileURLToPath(new URL('./src/lib', import.meta.url)) } },
   build: { outDir: '../app/static', emptyOutDir: true },
-  server: { proxy: { '/api': 'http://127.0.0.1:8090', '/health': 'http://127.0.0.1:8090' } },
+  server: { proxy: { '/api': 'http://127.0.0.1:8090', '/externe': 'http://127.0.0.1:8090', '/health': 'http://127.0.0.1:8090' } },
 })

@@ -1,12 +1,15 @@
 """socle : squelette commun des applis (FastAPI + interface Svelte compilée).
 
 Routes : /health (publique), /api/session, /api/connexion, /api/deconnexion,
-/api/synthese (mesures réelles du conteneur), puis l'interface.
+/api/synthese (mesures réelles du conteneur), /api/reglages et /api/restaurer (0.6.0),
+/externe/sauvegarde (jeton commun, pour l'Anneau), puis l'interface.
 """
 from __future__ import annotations
 
 import asyncio
+import logging
 import platform
+import re
 import shutil
 import time
 from collections import Counter
@@ -18,12 +21,26 @@ from pathlib import Path
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 
-from . import __version__
+from . import __version__, maison
 from .auth import COMMUN, DUREE, Sessions
 from .config import APPLI, Config, charger
 
 ETAT: dict = {}
 PUBLIQUES = ("/api/connexion", "/api/session")
+journal = logging.getLogger("socle")
+
+# ---------------------------------------------------------------- réglages d'usage (0.6.0, contrat 2)
+# Ce que l'utilisateur règle dans l'appli : jamais dans la stack. Le type de la valeur par défaut fixe le type.
+REGLAGES_DEFAUTS = {
+    "message_accueil": "",       # texte affiché en tête de la Synthèse
+    "afficher_mesures": True,    # oui/non : le graphique des appels dans la Synthèse
+}
+# Anciennes variables de la stack, lues UNE fois (premier démarrage) pour reprendre la valeur, puis plus jamais.
+REGLAGES_VARIABLES = {"message_accueil": "APP_MESSAGE_ACCUEIL"}
+# Clés à ne jamais sortir de l'appli, en plus de ce que maison.est_secret() écarte déjà (un nom de secret).
+# Liste explicite même vide : une appli y met un réglage qui contient un chemin personnel, un nom de proche…
+EXCLUS_SAUVEGARDE: tuple[str, ...] = ()
+JOUR = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def _fichier_generation(cfg: Config) -> Path:
@@ -54,6 +71,12 @@ async def cycle(app: FastAPI):
     ETAT.update(cfg=cfg, sessions=Sessions(APPLI, cfg.password, _lire_generation(cfg)),
                 demarrage=datetime.now().astimezone(), debut=time.monotonic(),
                 total=0, minutes=Counter())
+    reglages = maison.Reglages(cfg.data / "reglages.json", REGLAGES_DEFAUTS, REGLAGES_VARIABLES)
+    for k in reglages.repris:      # le nom seulement : la valeur peut être personnelle
+        journal.warning("réglage « %s » repris de la variable %s (dernière lecture de cette variable)",
+                        k, REGLAGES_VARIABLES[k])
+    ETAT["reglages"] = reglages
+    ETAT.setdefault("lire_anneau", None)     # les tests y mettent un faux Anneau (argument lire= de maison)
     yield
 
 
@@ -64,6 +87,7 @@ app = FastAPI(title=APPLI, version=__version__, lifespan=cycle, docs_url=None, r
 
 @app.middleware("http")
 async def garde(request: Request, appel):
+    # /externe/… n'est pas gardé ici : chaque route y vérifie le jeton commun elle-même.
     chemin = request.url.path
     if chemin.startswith("/api/"):
         if chemin not in PUBLIQUES and not ETAT["sessions"].connecte(request.cookies):
@@ -72,13 +96,13 @@ async def garde(request: Request, appel):
         ETAT["total"] += 1
         ETAT["minutes"][datetime.now().strftime("%H:%M")] += 1
     reponse = await appel(request)
-    if chemin.startswith("/api/"):
+    if chemin.startswith(("/api/", "/externe/")):
         reponse.headers["Cache-Control"] = "no-store"
     return reponse
 
 
 class LectureSeule(Exception):
-    """Écriture refusée : l'appli tourne en lecture seule (APP_LECTURE_SEULE)."""
+    """Écriture refusée : l'appli tourne en lecture seule (MAISON_LECTURE_SEULE, ou APP_LECTURE_SEULE pour elle seule)."""
 
 
 def exiger_ecriture(quoi: str = "") -> None:
@@ -106,7 +130,8 @@ def sante():
 def session(request: Request):
     s = ETAT["sessions"]
     return {"connecte": s.connecte(request.cookies), "version": __version__,
-            "lecture_seule": ETAT["cfg"].lecture_seule}
+            "lecture_seule": ETAT["cfg"].lecture_seule,
+            "origine_lecture_seule": ETAT["cfg"].origine_lecture_seule}
 
 
 @app.post("/api/connexion")
@@ -173,6 +198,85 @@ def synthese():
             {"nom": "Uvicorn", "version": version_paquet("uvicorn")},
         ],
     }
+
+
+# ================================================================ réglages (0.6.0)
+# Réglages internes de l'appli : les changer ou les restaurer est permis même en lecture seule
+# (la lecture seule ne protège que les services extérieurs).
+
+@app.get("/api/reglages")
+def lire_reglages():
+    return {"reglages": ETAT["reglages"].tout()}
+
+
+@app.put("/api/reglages")
+def changer_reglages(corps=Body(...)):
+    if not isinstance(corps, dict):
+        raise HTTPException(400, "Réglages attendus sous la forme {clé: valeur}.")
+    try:
+        return {"reglages": ETAT["reglages"].changer(corps)}
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(400, f"Valeur refusée : {exc}.") from exc
+
+
+# ================================================================ sauvegarde (contrat de sauvegarde 1)
+
+@app.get("/externe/sauvegarde")
+def externe_sauvegarde(request: Request):
+    """Lue chaque nuit par l'Anneau, avec le jeton commun. Réglages publics et version seulement."""
+    acceptes = maison.jetons()
+    if not acceptes:
+        raise HTTPException(404, "Not Found")                 # MAISON_JETON vide : porte fermée
+    if not maison.jeton_valide(maison.jeton_propose(request.headers), acceptes):
+        raise HTTPException(401, "Jeton commun manquant ou invalide.")
+    return maison.sauvegarde(APPLI, __version__, ETAT["reglages"].tout(), exclus=EXCLUS_SAUVEGARDE)
+
+
+def _demander_anneau(le: str = "") -> dict:
+    """Demande à l'Anneau ; ses pannes deviennent des messages clairs (404 rien à restaurer, 503 injoignable)."""
+    if le and not JOUR.match(le):
+        raise HTTPException(400, "Date attendue sous la forme AAAA-MM-JJ.")
+    try:
+        reponse = maison.lire_sauvegarde(APPLI, le, lire=ETAT.get("lire_anneau"))
+    except Exception as exc:                                  # noqa: BLE001 — urllib, réseau, JSON…
+        if getattr(exc, "code", None) == 404:
+            raise HTTPException(404, "L'Anneau n'a aucune sauvegarde du socle"
+                                     f"{' le ' + le if le else ''}.") from exc
+        raise HTTPException(503, "L'Anneau ne répond pas : restauration impossible pour l'instant "
+                                 f"({exc.__class__.__name__}).") from exc
+    if not isinstance(reponse, dict):
+        raise HTTPException(503, "Réponse de l'Anneau illisible.")
+    if le and not isinstance(reponse.get("reglages"), dict):
+        raise HTTPException(404, f"L'Anneau n'a aucune sauvegarde du socle le {le}.")
+    return reponse
+
+
+@app.get("/api/restaurer")
+def restaurer_voir(le: str = ""):
+    if not le:
+        dates = _demander_anneau().get("dates") or []
+        return {"dates": [d for d in dates if isinstance(d, str)]}
+    sauve = _demander_anneau(le)
+    return {"le": le, "version": sauve.get("version", ""),
+            "differences": maison.differences(ETAT["reglages"].tout(), sauve["reglages"], EXCLUS_SAUVEGARDE)}
+
+
+@app.post("/api/restaurer")
+def restaurer(corps: dict = Body(...)):
+    le = str(corps.get("le", ""))
+    if not le:
+        raise HTTPException(400, "Choisis la date de la sauvegarde à restaurer.")
+    sauve = _demander_anneau(le)
+    reglages = ETAT["reglages"]
+    appliques, ignores = [], []
+    for d in maison.differences(reglages.tout(), sauve["reglages"], EXCLUS_SAUVEGARDE):
+        try:
+            reglages.changer({d["cle"]: d["sauve"]})
+            appliques.append(d["cle"])
+        except (TypeError, ValueError):
+            ignores.append(d["cle"])          # valeur d'une ancienne version qui n'a plus le bon type
+    journal.warning("réglages restaurés depuis la sauvegarde du %s : %s", le, ", ".join(appliques) or "aucun")
+    return {"le": le, "appliques": appliques, "ignores": ignores, "reglages": reglages.tout()}
 
 
 # ================================================================ interface
