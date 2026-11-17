@@ -64,12 +64,12 @@ Pièges vus en le faisant :
 **La connexion commune (0.3.0).** Le portail de la maison pose à sa connexion un second cookie, `maison_session`, que chaque appli accepte :
 
 ```
-valeur = "<expiration en secondes>.<HMAC-SHA256(clé, expiration)>"
-clé    = SHA256("maison-session|" + mot de passe commun)
+valeur = "<génération>.<expiration en secondes>.<HMAC-SHA256(clé, "génération.expiration")>"   (0.8.0, 18/11/2026)
+clé    = PBKDF2-SHA256(mot de passe commun, sel "maison-session|", 200 000 tours)              (0.7.0, 17/11/2026)
 ```
 
 - Le navigateur envoie un cookie à **tous les ports d'un même hôte** : c'est ce qui permet à un cookie posé par une appli d'être lu par les autres.
-- Il ne porte pas de génération : il vaut trente jours, ou jusqu'au changement du mot de passe. « Se déconnecter » dans n'importe quelle appli le retire du navigateur.
+- Il porte la **génération commune**, tenue par le portail (sa génération des sessions) et publiée dans son annuaire (`/externe/services`, champ `generation_commune`). « Se déconnecter » dans le portail l'augmente ; chaque appli la relit au plus toutes les minutes (`maison.generation_commune()`, sans jamais faire attendre une requête) et refuse un cookie commun d'une autre génération. Portail injoignable (génération inconnue) : le cookie est accepté, pour ne rien bloquer. Sinon il vaut trente jours, ou jusqu'au changement du mot de passe. « Se déconnecter » dans une autre appli le retire seulement de ce navigateur.
 - Une appli qui a un autre mot de passe le refuse, simplement, et demande le sien.
 - Dans le socle : `Sessions.connecte(cookies)` (cookie de l'appli **ou** cookie commun), `Sessions.creer_commun()` pour l'appli qui le pose. Seul le portail le pose.
 - Cela ne vaut que pour les applis maison. Un service qui a ses propres comptes ne peut être ouvert d'office que si le portail garde ses identifiants (refusé) ou par un fournisseur d'identité (chantier à part).

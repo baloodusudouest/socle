@@ -316,3 +316,28 @@ def test_lire_sauvegarde_anneau_injoignable_leve(monkeypatch):
         raise OSError("refusé")
     with pytest.raises(OSError):
         maison.lire_sauvegarde("essai", lire=panne)
+
+
+def test_l_annuaire_lit_la_generation_commune_publiee_par_l_anneau():
+    """0.8.0 : /externe/services porte « generation_commune » ; une ancienne réponse (liste seule) reste lue."""
+    import time as _t
+    reponses = [{"contrat": 2, "generation_commune": 4, "services": [{"nom": "Carnet", "locale": "http://c"}]}]
+    a = maison.Annuaire(url="http://anneau", jeton="j", lire=lambda: reponses[0])
+    assert a.generation_sans_attendre() is None or a.generation_commune == 4     # première lecture en arrière-plan
+    for _ in range(50):
+        if a.generation_commune == 4:
+            break
+        _t.sleep(0.02)
+    assert a.generation_commune == 4 and maison.generation_commune() == 4
+    assert a.adresse("carnet") == "http://c"
+    b = maison.Annuaire(url="http://anneau", jeton="j", lire=lambda: [{"nom": "Gazette", "locale": "http://g"}])
+    assert b.services() and b.generation_commune is None and maison.generation_commune() is None
+    maison._ANNUAIRE = None
+
+
+def test_l_anneau_donne_sa_generation_directement():
+    maison.definir_generation_commune(lambda: 7)
+    try:
+        assert maison.generation_commune() == 7
+    finally:
+        maison.definir_generation_commune(None)

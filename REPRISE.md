@@ -2,8 +2,10 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
-## État (16/11/2026)
+## État (18/11/2026)
 
+- **0.8.0** (18/11/2026, audit du 17/11) : révocation du cookie commun. `maison_session` vaut « génération.expiration.signature » ; la génération est celle des sessions de l'Anneau, publiée dans `/externe/services` (`generation_commune`) ; `maison.generation_commune()` (relue au plus toutes les minutes, jamais bloquante ; `None` si l'Anneau ne répond pas → cookie accepté) ; l'Anneau se déclare par `maison.definir_generation_commune()`. Copié dans les 12 applis. Voir `docs/lecons.md` § 3.
+- **0.7.0** (17/11/2026) : clés des cookies par PBKDF2, comparaisons en octets, 30 essais en 5 minutes au plus ; annuaire relu 30 s après un échec.
 - **0.6.0** (16/11/2026) : chantier B « réglages dans l'appli, sauvegarde et restauration » et nettoyage des anciens noms.
   - `app/maison.py` passe au **contrat 2** (`Reglages`, `est_secret`, `reglages_publics`, `sauvegarde`, `differences`, `lire_sauvegarde`) ; signé par `python tools/diffuser_maison.py` (sans argument) ; déjà copié dans les applis.
   - Implémentation de référence : `app/main.py` (`REGLAGES_DEFAUTS`, `REGLAGES_VARIABLES`, `EXCLUS_SAUVEGARDE`, routes `/api/reglages`, `/externe/sauvegarde`, `/api/restaurer`), `frontend/src/pages/Reglages.svelte` (tuiles « Réglages » et « Restaurer les réglages »), `pages/Synthese.svelte` (les deux réglages de démonstration y jouent). Fichier `reglages.json` dans `/data`.
