@@ -4,6 +4,7 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (18/11/2026)
 
+- **0.8.1** (18/11/2026) : cookies `Secure` en https (`auth.en_https`) ; `entrypoint.sh` refuse root (`MAISON_ROOT_ACCEPTE=oui` en dépannage). Même correctif dans les 12 applis (refus de root seulement là où il y a gosu : pas Millésime, Transhumance, Éphéméride).
 - **0.8.0** (18/11/2026, audit du 17/11) : révocation du cookie commun. `maison_session` vaut « génération.expiration.signature » ; la génération est celle des sessions de l'Anneau, publiée dans `/externe/services` (`generation_commune`) ; `maison.generation_commune()` (relue au plus toutes les minutes, jamais bloquante ; `None` si l'Anneau ne répond pas → cookie accepté) ; l'Anneau se déclare par `maison.definir_generation_commune()`. Copié dans les 12 applis. Voir `docs/lecons.md` § 3.
 - **0.7.0** (17/11/2026) : clés des cookies par PBKDF2, comparaisons en octets, 30 essais en 5 minutes au plus ; annuaire relu 30 s après un échec.
 - **0.6.0** (16/11/2026) : chantier B « réglages dans l'appli, sauvegarde et restauration » et nettoyage des anciens noms.

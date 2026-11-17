@@ -36,7 +36,7 @@ Puis renommer, partout où le mot « socle » ou le préfixe `APP_` apparaît :
 | `app/config.py` | nom de l'appli, préfixe des variables propres (`MONAPPLI_DATA`, `MONAPPLI_LECTURE_SEULE`…) ; le mot de passe est `MAISON_PASSWORD`, commun (`maison.mot_de_passe()`) ; les réglages d'usage vont dans `REGLAGES_DEFAUTS` (`app/main.py`), pas dans une variable |
 | `app/__init__.py` | version |
 | `Dockerfile` | étiquettes, variables, port exposé, port du contrôle de santé |
-| `entrypoint.sh` | variables et port |
+| `entrypoint.sh` | variables et port ; garder le refus de root (`/data` à root : arrêt avec le remède, `MAISON_ROOT_ACCEPTE=oui` en dépannage) |
 | `docker-compose.yml`, `.env.example` | nom du service, image, port, variables ; aucune vraie valeur |
 | `.github/workflows/docker.yml` | nom de l'image |
 | `frontend/index.html`, `public/manifest.webmanifest` | titre, nom sur l'écran d'accueil |
@@ -57,7 +57,7 @@ Pièges vus en le faisant :
 
 **Le mot de passe.** Une seule variable, douze caractères au moins ; sinon le conteneur s'arrête au démarrage avec un message clair dans ses journaux. Toutes les applis de la maison reçoivent la même valeur.
 
-**La session.** Un cookie signé (HMAC du mot de passe), `HttpOnly`, `SameSite=Strict`, trente jours. Une « génération » écrite dans le dossier de données : « Se déconnecter » l'augmente et invalide tous les cookies émis avant. Changer le mot de passe déconnecte tout le monde. Délai avant réponse à chaque essai, allongé après cinq échecs.
+**La session.** Un cookie signé (HMAC du mot de passe), `HttpOnly`, `SameSite=Strict`, trente jours ; `Secure` quand la page est en https (directe, `X-Forwarded-Proto` d'un relais comme Tailscale Serve, ou origine de la page : `auth.en_https`, 0.8.1). Une « génération » écrite dans le dossier de données : « Se déconnecter » l'augmente et invalide tous les cookies émis avant. Changer le mot de passe déconnecte tout le monde. Délai avant réponse à chaque essai, allongé après cinq échecs.
 
 **La garde.** Un seul filtre : toute route `/api/…` demande la session, sauf la liste courte des routes publiques. `/health` est public et ne dit que « ok » et la version. Les réponses d'API portent `Cache-Control: no-store`, **sauf les images**, à qui on laisse un cache privé (sinon chaque vignette est retéléchargée à chaque affichage).
 

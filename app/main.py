@@ -22,7 +22,7 @@ from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 
 from . import __version__, maison
-from .auth import COMMUN, DUREE, Sessions
+from .auth import COMMUN, DUREE, Sessions, en_https
 from .config import APPLI, Config, charger
 
 ETAT: dict = {}
@@ -135,14 +135,14 @@ def session(request: Request):
 
 
 @app.post("/api/connexion")
-async def connexion(corps: dict = Body(...)):
+async def connexion(request: Request, corps: dict = Body(...)):
     s = ETAT["sessions"]
     if ETAT["cfg"].attente_connexion:
         await asyncio.sleep(s.attente())
     if not s.verifier_mot_de_passe(str(corps.get("mot_de_passe", ""))):
         raise HTTPException(401, "Mot de passe incorrect.")
     r = JSONResponse({"ok": True})
-    r.set_cookie(s.cookie, s.creer(), max_age=DUREE, httponly=True, samesite="strict")
+    r.set_cookie(s.cookie, s.creer(), max_age=DUREE, httponly=True, samesite="strict", secure=en_https(request))
     return r
 
 

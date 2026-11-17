@@ -85,3 +85,13 @@ def test_lecture_seule_refuse_avant_d_ecrire(client, tmp_path):
     assert r.status_code == 409 and "lecture seule" in r.json()["detail"]
     assert not (tmp_path / "temoin.txt").exists()
     assert client.get("/api/synthese").status_code == 200           # la lecture continue
+
+
+def test_cookie_secure_seulement_en_https(client):
+    """Audit du 17/11/2026 : en https (direct, X-Forwarded-Proto ou origine), le cookie porte « Secure »."""
+    r = client.post("/api/connexion", json={"mot_de_passe": MOT_DE_PASSE})
+    assert "secure" not in r.headers["set-cookie"].lower()
+    r = client.post("/api/connexion", json={"mot_de_passe": MOT_DE_PASSE}, headers={"X-Forwarded-Proto": "https"})
+    assert "secure" in r.headers["set-cookie"].lower()
+    r = client.post("/api/connexion", json={"mot_de_passe": MOT_DE_PASSE}, headers={"Origin": "https://nas.exemple.ts.net:8090"})
+    assert "secure" in r.headers["set-cookie"].lower()
