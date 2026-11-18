@@ -7,6 +7,7 @@ import sqlite3
 import threading
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -229,7 +230,7 @@ def test_sante_sans_jeton_sans_messages(monkeypatch):
     with pytest.raises(RuntimeError), maison.TACHES.tour("synchro-icloud"):
         raise RuntimeError("refus du serveur")
     s = maison.sante(requete(), jeton_commun=("jeton-commun-invente",))
-    assert s["version_socle"] == "0.9.0" and s["copie_base"] is None
+    assert s["version_socle"] == "0.9.1" and s["copie_base"] is None
     assert "message" not in s["taches"][0] and s["taches"][0]["derniere_erreur"]
     faux = maison.sante(requete({"authorization": "Bearer autre-jeton"}), jeton_commun=("jeton-commun-invente",))
     assert "message" not in faux["taches"][0]
@@ -263,7 +264,7 @@ def client(tmp_path, monkeypatch):
 
 def test_health_du_socle(client):
     s = client.get("/health").json()
-    assert s["ok"] is True and s["version"] and s["version_socle"] == "0.9.0" and s["copie_base"] is None
+    assert s["ok"] is True and s["version"] and s["version_socle"] == "0.9.1" and s["copie_base"] is None
     assert s["taches"][0]["nom"] == "demo" and "message" not in s["taches"][0]
     avec = client.get("/health", headers={"Authorization": "Bearer jeton-commun-invente"}).json()
     assert avec["taches"][0]["message"] == "RuntimeError: panne inventée"
@@ -462,9 +463,9 @@ def test_planifier_copie_dans_un_fil_sous_la_tache(tmp_path, monkeypatch):
     fils = []
     vraie_copie = maison.copier_bases
 
-    def copie_espionne(chemins, dossier):
+    def copie_espionne(chemins, dossier, ouvrir=None):
         fils.append(threading.current_thread() is threading.main_thread())
-        return vraie_copie(chemins, dossier)
+        return vraie_copie(chemins, dossier, ouvrir)
 
     monkeypatch.setattr(maison, "copier_bases", copie_espionne)
     async def dormir(s):
@@ -509,3 +510,19 @@ def test_planifier_copie_attend_par_morceaux_et_survit_a_une_erreur(tmp_path, mo
     e = etat(maison.TACHES, "copie-des-bases", avec_messages=True)
     assert e["derniere_erreur"] and "FileNotFoundError" in e["message"]
     assert maison.copie_base_etat()["ok"] is False
+
+
+def test_copie_avec_ouverture_propre_a_l_appli(tmp_path):
+    """0.9.1 : une appli à base chiffrée passe sa propre ouverture ; elle sert à lire, écrire et vérifier la copie."""
+    base = tmp_path / "chiffree.db"
+    cx = sqlite3.connect(base); cx.execute("CREATE TABLE t(x)"); cx.execute("INSERT INTO t VALUES (1)"); cx.commit(); cx.close()
+    appels = []
+
+    def ouvrir(chemin, lecture_seule):
+        appels.append((Path(chemin).name, lecture_seule))
+        return sqlite3.connect(chemin)
+
+    r = maison.copier_bases([base], tmp_path / "copies", ouvrir)
+    assert r["ok"] is True
+    assert ("chiffree.db", True) in appels and any(n.endswith(".partiel") and not ro for n, ro in appels)
+    assert sqlite3.connect(tmp_path / "copies" / "chiffree-derniere.db").execute("SELECT x FROM t").fetchall() == [(1,)]

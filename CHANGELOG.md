@@ -1,5 +1,8 @@
 # Journal des versions
 
+## 0.9.1 — 18 novembre 2026 (copie d'une base chiffrée)
+- `copier_bases` et `planifier_copie` acceptent `ouvrir(chemin, lecture_seule)` : une appli à base chiffrée (carnet, SQLCipher) passe sa propre ouverture ; la copie reste chiffrée avec la même clé. Par défaut, SQLite en clair comme en 0.9.0.
+
 ## 0.9.0 — 18 novembre 2026 (santé des tâches et copie des bases)
 - **Santé des tâches de fond** (chantier E2) : module commun `maison.py` (socle 0.9.0, `VERSION_SOCLE`) : registre `maison.TACHES` (classe `Taches`, en mémoire, protégé par un verrou) ; `declarer(nom, periode_s, type="reguliere"|"demande")`, `tour(nom)` et `tour_async(nom)` marquent le début, la réussite ou l'erreur ; `etat(avec_messages)` donne chaque tâche au format du contrat (`ok`, `en_retard`, `bloquee`, `jamais`, et `erreur` pour une tâche à la demande). Les messages d'erreur gardent le type et la première ligne, 160 caractères au plus, et passent par un filtre qui masque tout ce qui ressemble à un secret (adresse avec identifiants, `token=…`, `Bearer …`).
 - **`/health` gagne `version_socle`, `taches` et `copie_base`** (`maison.sante(request, jeton_commun, session_ok)`) ; rien d'existant ne change. Les messages n'y sont que si la requête porte le jeton commun (comparé en temps constant) ou une session valide. Le `/health` du socle les montre (pas de tâche ni de base : `taches` vide, `copie_base` null).

@@ -49,7 +49,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 CONTRAT = 2
-VERSION_SOCLE = "0.9.0"      # version du socle d'où vient ce fichier (publiée dans /health : version_socle)
+VERSION_SOCLE = "0.9.1"      # version du socle d'où vient ce fichier (publiée dans /health : version_socle)
 VRAI = {"oui", "1", "true", "yes", "vrai"}
 FAUX = {"non", "0", "false", "no", "faux"}
 
@@ -637,7 +637,14 @@ def _retenir_copie(dossier: Path, resultat: dict) -> None:
         _ecrire_copie_json(dossier, resultat)
 
 
-def copier_bases(chemins, dossier) -> dict:
+def _ouvrir_sqlite(chemin: Path, lecture_seule: bool = False):
+    """Ouverture par défaut des bases à copier (SQLite en clair)."""
+    if lecture_seule:
+        return sqlite3.connect(Path(chemin).resolve().as_uri() + "?mode=ro", uri=True, timeout=30)
+    return sqlite3.connect(chemin)
+
+
+def copier_bases(chemins, dossier, ouvrir=None) -> dict:
     """Copie cohérente de chaque base SQLite de l'appli (même pendant une écriture : API de sauvegarde de SQLite),
     vers <dossier>/<nom>-derniere.db, écrasée à chaque fois (Hyper Backup tient l'historique).
 
@@ -645,9 +652,12 @@ def copier_bases(chemins, dossier) -> dict:
     (PRAGMA integrity_check) ; c'est seulement quand toutes sont bonnes qu'elles remplacent les copies précédentes.
     Une copie qui échoue l'intégrité est effacée, et l'erreur repart (la tâche passe en erreur). Les copies sont
     en journal « delete » : un seul fichier par base, sans -wal ni -shm, prêt à remettre en place.
+    0.9.1 : `ouvrir(chemin, lecture_seule)` rend une connexion (défaut : SQLite en clair) ; une appli à base
+    chiffrée (carnet, SQLCipher) passe la sienne : la copie reste chiffrée avec la même clé.
     Retour (format copie_base de /health) : {"le", "ok", "bases", "taille"} ; gardé en mémoire et dans
     <dossier>/copie.json. Bloquant : à lancer dans un fil (asyncio.to_thread), jamais dans la boucle du serveur.
     """
+    ouvrir = ouvrir or _ouvrir_sqlite
     dossier = Path(dossier)
     chemins = [Path(c) for c in chemins]
     noms = [_nom_copie(c) for c in chemins]
@@ -665,16 +675,16 @@ def copier_bases(chemins, dossier) -> dict:
             with contextlib.suppress(FileNotFoundError):
                 partiel.unlink()
             # lecture seule : la copie ne crée jamais une base vide à la place d'une base disparue
-            src = sqlite3.connect(chemin.resolve().as_uri() + "?mode=ro", uri=True, timeout=30)
+            src = ouvrir(chemin, True)
             try:
-                dst = sqlite3.connect(partiel)
+                dst = ouvrir(partiel, False)
                 try:
                     src.backup(dst)            # en une seule étape : instantané cohérent de la base
                 finally:
                     dst.close()
             finally:
                 src.close()
-            verif = sqlite3.connect(partiel)
+            verif = ouvrir(partiel, False)
             try:
                 verif.execute("PRAGMA journal_mode=DELETE").fetchall()
                 lignes = [r[0] for r in verif.execute("PRAGMA integrity_check").fetchall()]
@@ -764,7 +774,7 @@ def prochaine_copie(heure_paris: str, maintenant: datetime | None = None, paris=
 
 
 async def planifier_copie(appli: str, chemins, dossier, heure_paris: str | None = None, *, dormir=asyncio.sleep,
-                          tours: int | None = None) -> None:
+                          tours: int | None = None, ouvrir=None) -> None:
     """Boucle de nuit : à l'heure de Paris de l'appli (HEURES_COPIE), copier_bases dans un fil à part, sous la tâche
     régulière « copie-des-bases » (24 h) du registre. Une copie ratée est notée (tâche en retard, copie_base ok:
     false) et la boucle continue. À lancer au démarrage : asyncio.create_task(maison.planifier_copie(...)).
@@ -782,7 +792,7 @@ async def planifier_copie(appli: str, chemins, dossier, heure_paris: str | None 
             await dormir(min(reste, 3600))
         try:
             async with TACHES.tour_async(TACHE_COPIE):
-                await asyncio.to_thread(copier_bases, chemins, dossier)
+                await asyncio.to_thread(copier_bases, chemins, dossier, ouvrir)
         except Exception as exc:       # noqa: BLE001 — la boucle de nuit ne meurt pas d'une copie ratée
             journal.warning("%s : copie des bases ratée (%s)", appli, message_erreur(exc))
         fait += 1
@@ -815,4 +825,4 @@ def empreinte_calculee(chemin: str | Path | None = None) -> str:
 def empreinte_ecrite(chemin: str | Path | None = None) -> str:
     texte = Path(chemin or __file__).read_text(encoding="utf-8")
     return texte.rsplit("\n# empreinte: ", 1)[-1].strip() if "\n# empreinte: " in texte else ""
-# empreinte: 02c8f8e27cf8eb0c
+# empreinte: 8e043b183229aa14
