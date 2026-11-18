@@ -194,7 +194,7 @@ def test_sauvegarde_contenu(client, env, monkeypatch):
 def test_sauvegarde_sans_exclusion_rend_tous_les_reglages(client):
     s = client.get("/externe/sauvegarde", headers={"Authorization": f"Bearer {JETON}"}).json()
     assert set(s["reglages"]) == set(main.REGLAGES_DEFAUTS)
-    assert set(s) == {"contrat", "appli", "version", "le", "reglages"}
+    assert set(s) == {"contrat", "appli", "version", "le", "reglages", "ecartes"} and s["ecartes"] == []   # 0.8.2 : noms écartés listés
 
 
 # ================================================================ restaurer

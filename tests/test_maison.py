@@ -341,3 +341,15 @@ def test_l_anneau_donne_sa_generation_directement():
         assert maison.generation_commune() == 7
     finally:
         maison.definir_generation_commune(None)
+
+
+def test_noms_secrets_par_mots():
+    """0.8.2 (audit, M3) : code_postal et mot_cle sortent ; mdp, pwd, monToken et une adresse avec identifiants non."""
+    for nom in ("code_postal", "mot_cle", "couleur", "afficher_mesures", "message_accueil", "dpi", "pas_note"):
+        assert not maison.est_secret(nom), nom
+    for nom in ("mdp", "PWD", "pass", "monToken", "API_KEY", "ha_webhook", "jeton_ha", "cle_publique", "code_acces",
+                "motDePasse", "password", "immich_cle"):
+        assert maison.est_secret(nom), nom
+    r = maison.sauvegarde("essai", "1", {"code_postal": "47000", "mdp": "x", "lien": "https://moi:secret@exemple.invalid/x",
+                                          "titre": "ok"})
+    assert r["reglages"] == {"code_postal": "47000", "titre": "ok"} and r["ecartes"] == ["lien", "mdp"]

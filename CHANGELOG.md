@@ -1,5 +1,9 @@
 # Journal des versions
 
+## 0.8.2 — 18 novembre 2026 (constats moyens de l'audit)
+- **Réglages secrets reconnus par mots** (audit M3) : `maison.est_secret` découpe le nom (`camelCase`, `_`, `-`, `.`) et reconnaît les mots qui trahissent un secret (password, pass, mdp, token, jeton, cle, key, code, login, email, webhook, session…), même collés (« motdepasse », « apikey ») ; quelques paires inoffensives restent publiques (code postal, mot-clé, clé de tri). Une valeur qui est une adresse avec identifiant (`https://nom:mot@…`) est écartée quel que soit son nom.
+- La sauvegarde des réglages (`/externe/sauvegarde`) dit maintenant **ce qu'elle a écarté** : champ `ecartes` (noms seulement, jamais les valeurs), pour que l'Anneau montre qu'un réglage n'est pas sauvegardé.
+
 ## 0.8.1 — 18 novembre 2026 (cookies Secure)
 - **Cookies `Secure` en https** (audit du 17/11/2026, même correctif dans toutes les applis maison) : ouverte en https (directement, derrière Tailscale Serve qui le dit par `X-Forwarded-Proto`, ou d'après l'origine de la page), l'appli pose ses cookies de session avec l'attribut `Secure` : ils ne partent jamais en clair. En http (adresse locale), rien ne change.
 - `entrypoint.sh` refuse de lancer l'appli en root quand `/data` appartient à root (dossier créé par Docker) et dit le remède ; dépannage seulement : `MAISON_ROOT_ACCEPTE=oui`.
