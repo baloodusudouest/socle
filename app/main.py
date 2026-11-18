@@ -120,8 +120,11 @@ async def _lecture_seule(_: Request, exc: LectureSeule):
 # ================================================================ public
 
 @app.get("/health")
-def sante():
-    return {"ok": True, "version": __version__}
+def sante(request: Request):
+    # 0.9.0 : version_socle, taches, copie_base (maison.sante) ; messages d'erreur seulement avec le jeton commun
+    # ou une session. Le socle n'a ni boucle ni base : taches vide, copie_base null.
+    session_ok = "sessions" in ETAT and ETAT["sessions"].connecte(request.cookies)
+    return {"ok": True, "version": __version__, **maison.sante(request, session_ok=session_ok)}
 
 
 # ================================================================ connexion

@@ -4,6 +4,7 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 ## État (18/11/2026)
 
+- **0.9.0** (18/11/2026, chantier « santé des tâches de fond (E2) et copie des bases (E3) », dossier `sante-et-copies-dossier.md` § 5) : `maison.py` gagne `VERSION_SOCLE`, le registre `TACHES` (`declarer`, `tour`, `tour_async`, `etat`), `masquer_secrets`/`message_erreur`, `copier_bases`, `copie_base_etat`, `prochaine_copie`, `planifier_copie`, `HEURES_COPIE` et `sante()` (champs `version_socle`, `taches`, `copie_base` de `/health`). `CONTRAT` reste 2 (les tests des applis le vérifient). Signé ; **pas encore diffusé** aux applis (le coordinateur le fait). Le `/health` du socle montre les nouveaux champs. Tests : `tests/test_sante.py`. Un seul worker uvicorn (déjà le cas, `entrypoint.sh`). **Jamais essayé sur la vraie installation** ; la restauration depuis une copie est à répéter sur carnet avant de dire E3 fini.
 - **0.8.2** (18/11/2026) : `est_secret` par mots, `valeur_secrete` (adresse avec identifiant), champ `ecartes` dans la sauvegarde (audit M3). Diffusé aux 12 applis.
 - **0.8.1** (18/11/2026) : cookies `Secure` en https (`auth.en_https`) ; `entrypoint.sh` refuse root (`MAISON_ROOT_ACCEPTE=oui` en dépannage). Même correctif dans les 12 applis (refus de root seulement là où il y a gosu : pas Millésime, Transhumance, Éphéméride).
 - **0.8.0** (18/11/2026, audit du 17/11) : révocation du cookie commun. `maison_session` vaut « génération.expiration.signature » ; la génération est celle des sessions de l'Anneau, publiée dans `/externe/services` (`generation_commune`) ; `maison.generation_commune()` (relue au plus toutes les minutes, jamais bloquante ; `None` si l'Anneau ne répond pas → cookie accepté) ; l'Anneau se déclare par `maison.definir_generation_commune()`. Copié dans les 12 applis. Voir `docs/lecons.md` § 3.
@@ -44,6 +45,8 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 - Animations : transitions natives de Svelte ; motion.dev seulement pour Frise.
 
 ## Pièges
+
+- `maison.TACHES` et la dernière copie vivent en mémoire du processus : jamais `--workers` > 1 dans `uvicorn`. Une copie prévue mais pas encore faite répond `copie_base: {"le": null, "ok": false, …}`.
 
 - L'écran « Connexion » (les services) est `pages/Services.svelte` ; `pages/Connexion.svelte` est la page du mot de passe. Même piège dans carnet et Millésime.
 - Les neutres du socle étaient froids (teinte 260) ; ils sont maintenant ceux de carnet. Ne pas revenir en arrière : le froid a été refusé.

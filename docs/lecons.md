@@ -286,6 +286,16 @@ clé    = PBKDF2-SHA256(mot de passe commun, sel "maison-session|", 200 000 tour
 - **Déploiement en deux temps.** D'abord la nouvelle image avec la stack actuelle (les réglages sont repris des anciennes variables au premier démarrage), vérifier Réglages, puis la nouvelle stack sans les anciennes lignes. Dans l'autre ordre, les valeurs sont perdues sans bruit : le réglage prend son défaut.
 - **Tests sans réseau** : l'Anneau se remplace par l'argument `lire=` de `maison.lire_sauvegarde` (dans le socle, `ETAT["lire_anneau"]`). Un faux Anneau qui sait répondre une date, une date inconnue (404) et une panne (`URLError`) couvre tous les messages de l'écran.
 
+## 22. Santé des tâches de fond et copie des bases (socle 0.9.0, 18/11/2026)
+
+- **Une boucle de fond qui meurt ne fait pas de bruit.** Chaque boucle se déclare dans `maison.TACHES` (`declarer("synchro-icloud", 3600)`, ou `type="demande"` pour un import lancé à la main) et entoure chaque tour de `with maison.TACHES.tour(nom):` (`async with maison.TACHES.tour_async(nom):` dans une coroutine). `/health` fusionne `maison.sante(request, session_ok=...)` : `version_socle`, `taches`, `copie_base`. Rien d'autre ne change dans `/health` : Home Assistant et l'Anneau lisent déjà les anciens champs.
+- **Une seule règle pour une tâche régulière** : « ok » si la dernière réussite a moins de 2 × période + 10 min ; « bloquee » si un tour dure plus que sa période (2 h au plus) ; « jamais » pendant la première période après le démarrage ; sinon « en_retard ». Une tâche à la demande dit seulement « ok », « erreur » ou « jamais » : jamais d'orange pour elle.
+- **Un message d'erreur peut porter un secret** (adresse avec identifiants, `token=…`, `Bearer …`) : `maison.message_erreur` garde le type et la première ligne, masque ce qui y ressemble, coupe à 160 caractères ; et `/health` ne montre les messages qu'avec le jeton commun ou une session.
+- **Le registre vit en mémoire : un seul worker uvicorn.** Avec plusieurs workers, chacun aurait son registre et `/health` répondrait au hasard.
+- **Copier une base SQLite vivante** : jamais un `cp` (on emporte une base à moitié écrite et son `-wal` à part). `maison.copier_bases` passe par l'API de sauvegarde de SQLite (instantané cohérent même pendant une écriture), vérifie la copie (`PRAGMA integrity_check`), la met en journal « delete » (un seul fichier) et ne remplace les copies de la veille que quand toutes les bases de l'appli sont bonnes. Une copie par base, écrasée chaque nuit (`<base>-derniere.db`) : Hyper Backup tient l'historique. Bloquant : dans un fil (`asyncio.to_thread`), jamais dans la boucle du serveur.
+- **Heure de Paris, pas celle du conteneur** : `maison.planifier_copie` calcule l'heure en Europe/Paris quel que soit `TZ` (et sait faire sans données de fuseau) ; heures étalées par appli dans `maison.HEURES_COPIE`. Une heure qui n'existe pas (passage à l'heure d'été) tombe une heure plus tard. Attente par morceaux d'une heure : une horloge qui saute ne fait pas rater la nuit.
+- **Une copie jamais remise en place ne prouve rien** : répéter la restauration (arrêter, remettre la copie, enlever `-wal`/`-shm`, redémarrer, contrôler) avant de dire que c'est fini.
+
 ## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.
