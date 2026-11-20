@@ -5,6 +5,7 @@
   //    la variable n'a servi qu'une fois, au premier démarrage, pour reprendre la valeur ;
   //  - tuile « Restaurer les réglages » : l'Anneau garde chaque nuit une copie des réglages de chaque appli
   //    (sans secret). On choisit une date, on voit ce qui changerait (avant → sauvegardé), on confirme.
+  // 0.10.0 : la tuile « Dossier de données » vient d'ici (ce n'est pas un service extérieur : plus dans Connexion).
   import { onMount } from 'svelte'
   import { api } from '$lib/api.js'
   import { Button } from '$lib/components/ui/button/index.js'
@@ -100,11 +101,28 @@
     return String(v)
   }
 
+  // ------------------------------------------------------------ dossier de données (0.10.0)
+  let inscriptible = $state(null)
+  let messageDonnees = $state('')
+  let ecriture = $state(false)
+
+  async function lireDonnees() {
+    try { inscriptible = (await api.get('/api/synthese')).donnees_inscriptibles } catch (err) { messageDonnees = err.message }
+  }
+  async function ecrireTemoin() {
+    ecriture = true
+    try { await api.post('/api/essai-ecriture'); messageDonnees = 'Fichier témoin écrit dans le dossier de données.' }
+    catch (err) { messageDonnees = err.message }
+    ecriture = false
+    lireDonnees()
+  }
+
   const jour = (le) => new Date(le + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   onMount(() => {
     lireReglages()
     lireDates()
+    lireDonnees()
   })
 </script>
 
@@ -206,6 +224,17 @@
       {/if}
       {#if messageRestaurer}<p class="text-sm" role="status">{messageRestaurer}</p>{/if}
     {/if}
+  </section>
+
+  <section class="flex min-w-0 flex-col gap-3 rounded-2xl border bg-card p-5 md:col-span-2" aria-label="Dossier de données">
+    <div>
+      <h2 class="text-lg font-semibold">Dossier de données</h2>
+      <p class="mt-1 text-sm text-muted-foreground">Le seul endroit où le socle écrit. {inscriptible === null ? '' : inscriptible ? 'Écriture possible.' : 'Écriture refusée.'}</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <Button variant="outline" onclick={ecrireTemoin} disabled={ecriture || session.lecture_seule}>Écrire le fichier témoin</Button>
+      {#if messageDonnees}<p class="text-sm" role="status">{messageDonnees}</p>{/if}
+    </div>
   </section>
 
   <section class="rounded-2xl border bg-card p-5 md:col-span-2" aria-label="Écriture">

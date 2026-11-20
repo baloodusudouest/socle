@@ -167,3 +167,71 @@ def test_restaurer_anneau_injoignable(navigateur, adresse, taille):
         page.close()
     finally:
         ANNEAU["panne"] = False
+
+
+# ---------------------------------------------------------------- Connexion (0.10.0, contrat 3)
+
+def _ajouter_faux(n):
+    """Ajoute n faux services au registre du socle (essai immédiat, sans réseau) ; rend une fonction qui les retire."""
+    from app import main
+    reg = main.SERVICES
+    ids = [f"faux-{i}" for i in range(n)]
+    for i, id_ in enumerate(ids):
+        reg.ajouter(id_, f"Service {i + 1}", lit="Les fiches et leurs photos.", ecrit="Rien." if i % 2 else "Les albums de la soirée.",
+                    regle=i != 2, reglage="FAUX_URL", essai=lambda: (True, "Version 1.0."),
+                    geste={"id": "synchroniser", "nom": "Synchroniser"} if i == 0 else None)
+
+    def retirer():
+        for id_ in ids:
+            reg._ordre.remove(id_)
+            reg._def.pop(id_, None)
+            reg._dernier.pop(id_, None)
+    return retirer
+
+
+@pytest.mark.parametrize("taille", TAILLES)
+def test_connexion_fiches_depliees_jusqu_a_trois(navigateur, adresse, taille):
+    retirer = _ajouter_faux(1)          # l'Anneau + 1 : deux fiches dépliées
+    try:
+        page, erreurs = ouvrir(navigateur, adresse, taille, "connexion")
+        page.get_by_role("heading", name="Service 1").wait_for()
+        assert page.get_by_text("Ce qui est lu").count() == 2 and page.get_by_text("Ce qui est écrit").count() == 2
+        assert page.locator("[aria-expanded]").count() == 0                   # pas de tuiles
+        carte = page.locator("article", has=page.get_by_role("heading", name="Service 1"))
+        carte.get_by_role("button", name="Vérifier").click()
+        carte.get_by_text("Répond", exact=True).wait_for()
+        carte.get_by_text("Vérifié à l'instant").wait_for()
+        assert carte.get_by_role("button", name="Synchroniser").count() == 0   # le socle ne porte pas de geste
+        sans_debordement(page)
+        assert erreurs == []
+        page.close()
+    finally:
+        retirer()
+
+
+@pytest.mark.parametrize("taille", TAILLES)
+def test_connexion_tuiles_a_partir_de_quatre(navigateur, adresse, taille):
+    retirer = _ajouter_faux(4)          # l'Anneau + 4 : tuiles
+    try:
+        page, erreurs = ouvrir(navigateur, adresse, taille, "connexion")
+        tuile = page.locator("#tuile-faux-0")
+        tuile.wait_for()
+        assert page.get_by_text("Ce qui est lu").count() == 0
+        assert tuile.get_attribute("aria-expanded") == "false"
+        hauteur = tuile.bounding_box()["height"]
+        assert hauteur >= 44                                                 # cible au doigt
+        tuile.click()
+        assert tuile.get_attribute("aria-expanded") == "true"
+        page.get_by_text("Ce qui est lu").wait_for()
+        assert page.evaluate("document.activeElement.id") == "fiche-ouverte"
+        page.locator("#tuile-faux-2").click()                                # une seule ouverte
+        page.get_by_text("Pour le relier, dans la stack").wait_for()
+        page.get_by_text("FAUX_URL").wait_for()
+        page.keyboard.press("Escape")
+        page.get_by_text("Touche un service").wait_for()
+        assert page.evaluate("document.activeElement.id") == "tuile-faux-2"
+        sans_debordement(page)
+        assert erreurs == []
+        page.close()
+    finally:
+        retirer()

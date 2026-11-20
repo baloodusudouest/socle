@@ -1,7 +1,14 @@
-"""Signe app/maison.py (empreinte en dernière ligne) et, si on lui donne des dossiers d'applis, l'y copie tel quel.
+"""Signe les fichiers communs du socle et, si on lui donne des dossiers d'applis, les y copie tels quels.
+
+Fichiers communs :
+  app/maison.py                                   empreinte en dernière ligne (« # empreinte: … »)
+  frontend/src/lib/services/FicheService.svelte   0.10.0 : fiche d'un service (contrat 3)
+  frontend/src/lib/services/Services.svelte       0.10.0 : écran « Connexion » commun
+  (les deux .svelte portent « <!-- empreinte: … --> » en dernière ligne)
 
   python tools/diffuser_maison.py                         # signe seulement
-  python tools/diffuser_maison.py ../carnet ../millesime  # signe puis copie dans <appli>/app/maison.py
+  python tools/diffuser_maison.py ../carnet ../millesime  # signe puis copie dans chaque appli (mêmes chemins)
+  python tools/diffuser_maison.py --sans-interface ../verif-dates-photos   # maison.py seul (appli sans Svelte commun)
 """
 from __future__ import annotations
 
@@ -10,22 +17,47 @@ import shutil
 import sys
 from pathlib import Path
 
-SOURCE = Path(__file__).resolve().parent.parent / "app" / "maison.py"
+RACINE = Path(__file__).resolve().parent.parent
+SOURCE = RACINE / "app" / "maison.py"
 MARQUE = "\n# empreinte: "
+INTERFACE = [RACINE / "frontend" / "src" / "lib" / "services" / n for n in ("FicheService.svelte", "Services.svelte")]
+MARQUE_INTERFACE = "\n<!-- empreinte: "
+
+
+def _empreinte(corps: str) -> str:
+    return hashlib.sha256(corps.encode("utf-8")).hexdigest()[:16]
 
 
 def signer() -> str:
     texte = SOURCE.read_text(encoding="utf-8")
     corps = texte.rsplit(MARQUE, 1)[0].rstrip("\n")
-    empreinte = hashlib.sha256(corps.encode("utf-8")).hexdigest()[:16]
+    empreinte = _empreinte(corps)
     SOURCE.write_text(corps + MARQUE + empreinte + "\n", encoding="utf-8")
     return empreinte
 
 
+def signer_interface(chemin: Path) -> str:
+    texte = chemin.read_text(encoding="utf-8")
+    corps = texte.rsplit(MARQUE_INTERFACE, 1)[0].rstrip("\n")
+    empreinte = _empreinte(corps)
+    chemin.write_text(corps + MARQUE_INTERFACE + empreinte + " -->\n", encoding="utf-8")
+    return empreinte
+
+
 if __name__ == "__main__":
-    e = signer()
-    print("empreinte", e)
-    for dossier in sys.argv[1:]:
+    args = sys.argv[1:]
+    avec_interface = "--sans-interface" not in args
+    dossiers = [a for a in args if a != "--sans-interface"]
+    print("maison.py", signer())
+    for f in INTERFACE:
+        print(f.name, signer_interface(f))
+    for dossier in dossiers:
         cible = Path(dossier) / "app" / "maison.py"
         shutil.copyfile(SOURCE, cible)
         print("copié dans", cible)
+        if avec_interface:
+            rep = Path(dossier) / "frontend" / "src" / "lib" / "services"
+            rep.mkdir(parents=True, exist_ok=True)
+            for f in INTERFACE:
+                shutil.copyfile(f, rep / f.name)
+                print("copié dans", rep / f.name)

@@ -2,8 +2,9 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
-## État (18/11/2026)
+## État (20/11/2026)
 
+- **0.10.0** (20/11/2026, chantier « fiches Connexion », dossier et conseil `fiches-connexion-*.md` dans le projet Claude) : contrat 3 dans `maison.py` (registre `Services`, `monter_services`, `ANNEAU_CLE`), interface commune `frontend/src/lib/services/` (signée et diffusée comme `maison.py`). Diffusé aux applis dans le même chantier (ordre : Douze points, l'Anneau, puis les autres). **Jamais essayé sur la vraie installation.**
 - **0.9.0** (18/11/2026, chantier « santé des tâches de fond (E2) et copie des bases (E3) », dossier `sante-et-copies-dossier.md` § 5) : `maison.py` gagne `VERSION_SOCLE`, le registre `TACHES` (`declarer`, `tour`, `tour_async`, `etat`), `masquer_secrets`/`message_erreur`, `copier_bases`, `copie_base_etat`, `prochaine_copie`, `planifier_copie`, `HEURES_COPIE` et `sante()` (champs `version_socle`, `taches`, `copie_base` de `/health`). `CONTRAT` reste 2 (les tests des applis le vérifient). Signé ; **pas encore diffusé** aux applis (le coordinateur le fait). Le `/health` du socle montre les nouveaux champs. Tests : `tests/test_sante.py`. Un seul worker uvicorn (déjà le cas, `entrypoint.sh`). **Jamais essayé sur la vraie installation** ; la restauration depuis une copie est à répéter sur carnet avant de dire E3 fini.
 - **0.8.2** (18/11/2026) : `est_secret` par mots, `valeur_secrete` (adresse avec identifiant), champ `ecartes` dans la sauvegarde (audit M3). Diffusé aux 12 applis.
 - **0.8.1** (18/11/2026) : cookies `Secure` en https (`auth.en_https`) ; `entrypoint.sh` refuse root (`MAISON_ROOT_ACCEPTE=oui` en dépannage). Même correctif dans les 12 applis (refus de root seulement là où il y a gosu : pas Millésime, Transhumance, Éphéméride).
@@ -48,7 +49,8 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 
 - `maison.TACHES` et la dernière copie vivent en mémoire du processus : jamais `--workers` > 1 dans `uvicorn`. Une copie prévue mais pas encore faite répond `copie_base: {"le": null, "ok": false, …}`.
 
-- L'écran « Connexion » (les services) est `pages/Services.svelte` ; `pages/Connexion.svelte` est la page du mot de passe. Même piège dans carnet et Millésime.
+- L'écran « Connexion » (les services) est `$lib/services/Services.svelte` (commun, signé : ne pas le retoucher dans une appli) ; `pages/Connexion.svelte` est la page du mot de passe.
+- `maison.monter_services` doit être appelé **après** les autres `@app.middleware` : le dernier ajouté passe en premier. Appelé avant, la garde de l'appli refuse l'Anneau (401).
 - Les neutres du socle étaient froids (teinte 260) ; ils sont maintenant ceux de carnet. Ne pas revenir en arrière : le froid a été refusé.
 - Le registre shadcn-svelte.com n'est pas joignable depuis l'environnement de Claude : utiliser `tools/shadcn-local.mjs`.
 - Les sources shadcn-svelte utilisent des classes abstraites `cn-…` ; elles ne marchent pas copiées telles quelles, il faut passer par l'outil ou la commande officielle.

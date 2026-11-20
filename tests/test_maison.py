@@ -100,7 +100,7 @@ def sans_variables(monkeypatch):
 
 
 def test_contrats():
-    assert maison.CONTRAT == 2 and maison.CONTRAT_SAUVEGARDE == 1
+    assert maison.CONTRAT == 3 and maison.CONTRAT_SAUVEGARDE == 1
 
 
 def test_reglages_defauts_au_premier_demarrage(tmp_path, sans_variables):

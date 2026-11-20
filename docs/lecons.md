@@ -43,11 +43,11 @@ Puis renommer, partout où le mot « socle » ou le préfixe `APP_` apparaît :
 | `frontend/public/icone.svg` et ses deux PNG | l'icône de l'appli |
 | `frontend/src/app.css` | les deux valeurs de `--app` (sombre, clair) et `--app-contraste` |
 | `frontend/package.json` | nom, version ; retirer les bibliothèques de graphique si l'appli n'en trace pas |
-| `frontend/src/App.svelte`, `pages/Connexion.svelte`, `pages/Reglages.svelte`, `pages/Services.svelte` | nom affiché, entrées de navigation |
+| `frontend/src/App.svelte`, `pages/Connexion.svelte`, `pages/Reglages.svelte` | nom affiché, entrées de navigation (l'écran « Connexion » est commun : `$lib/services/`, ne pas le retoucher) |
 
 Pièges vus en le faisant :
 
-- **Deux écrans portent presque le même nom** : `pages/Connexion.svelte` est la page du mot de passe, `pages/Services.svelte` est l'écran « Connexion » (les services extérieurs).
+- **Deux écrans portent presque le même nom** : `pages/Connexion.svelte` est la page du mot de passe, l'écran « Connexion » (les services extérieurs) est `$lib/services/Services.svelte` depuis le socle 0.10.0 (avant : `pages/Services.svelte`, encore dans les applis pas encore passées au contrat 3).
 - **La version est écrite à plusieurs endroits** (`app/__init__.py`, `package.json`, parfois un test d'écran qui lit « Appli 0.1.0 », parfois le README). Les chercher tous avant de publier.
 - **Les PNG de l'icône** se régénèrent depuis le SVG avec le navigateur des tests (capture à 180 et 512 pixels, fond transparent).
 - **Les bibliothèques de graphique pèsent lourd** : les retirer divise le poids de l'interface par trois ou quatre.

@@ -1,5 +1,14 @@
 # Journal des versions
 
+## 0.10.0 — 20 novembre 2026 (fiches « Connexion » communes, contrat 3)
+- **Contrat 3** dans `maison.py` (`CONTRAT = 3`, `VERSION_SOCLE = "0.10.0"`) : registre `Services` (`ajouter`, `liste`, `verifier`, `verifier_async`, `noter`), `monter_services(app, registre, session_ok)` qui branche `GET /api/maison/services` et `POST /api/maison/services/{id}/verifier` avant la garde de l'appli ; `cle_anneau`, `cle_anneau_valide`, `nettoyer_detail`, `adresse_anneau`, `essai_http`, `empreinte_interface`.
+- Le GET ne lance aucun essai : il rend le dernier résultat et son âge. « Vérifier » : un essai léger, au plus un toutes les 30 s par service, arrêté au bout de 8 s, sans écriture (permis en lecture seule). Détail nettoyé (secrets, adresses, hôtes ; 160 caractères).
+- **`ANNEAU_CLE`** (nouvelle variable) : clé de lecture de l'Anneau, n'ouvre que ces deux routes ; se change seule. `MAISON_JETON` n'ouvre pas les fiches.
+- **Interface commune** `frontend/src/lib/services/` : `FicheService.svelte` (point, état en mots, Ce qui est lu, Ce qui est écrit, Pour le relier, âge de l'essai, Vérifier en contour, un geste plein) et `Services.svelte` (1 à 3 services : fiches dépliées ; 4 et plus : tuiles à voyant, fiche dessous, focus, Échap, `aria-expanded`, résultat annoncé). Signées et copiées par `tools/diffuser_maison.py` comme `maison.py`.
+- Le socle : son écran « Connexion » passe à l'écran commun (un service : l'Anneau) ; la tuile « Dossier de données » va dans Réglages. `pages/Services.svelte` est retiré.
+- Tests : `tests/test_services.py` (contrat, accès, limite, détail nettoyé, essais asynchrones, empreintes), `tests/test_ecran.py` (seuil de 3, tuiles, Échap, Vérifier, PC et iPhone).
+- **Jamais essayé sur la vraie installation.**
+
 ## 0.9.1 — 18 novembre 2026 (copie d'une base chiffrée)
 - `copier_bases` et `planifier_copie` acceptent `ouvrir(chemin, lecture_seule)` : une appli à base chiffrée (carnet, SQLCipher) passe sa propre ouverture ; la copie reste chiffrée avec la même clé. Par défaut, SQLite en clair comme en 0.9.0.
 

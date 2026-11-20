@@ -13,7 +13,7 @@
   import { api } from '$lib/api.js'
   import Connexion from './pages/Connexion.svelte'
   import Synthese from './pages/Synthese.svelte'
-  import Services from './pages/Services.svelte'
+  import Services from '$lib/services/Services.svelte'   // 0.10.0 : écran commun (contrat 3)
   import Reglages from './pages/Reglages.svelte'
   import Composants from './pages/Composants.svelte'
   import Documents from './pages/Documents.svelte'
@@ -99,7 +99,7 @@
           {:else if page === 'composants'}
             <Composants />
           {:else if page === 'connexion'}
-            <Services lectureSeule={session.lecture_seule} ondeconnecte={() => (connecte = false)} />
+            <Services etiquette="socle" lectureSeule={session.lecture_seule} ondeconnecte={() => (connecte = false)} />
           {:else if page === 'reglages'}
             <Reglages {session} {deconnecter} />
           {:else}

@@ -11,7 +11,7 @@ Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour l
 | **Navigation** | Rail à gauche sur PC (900 px et plus), avec les noms. Pilule d'icônes flottante en bas sur iPhone, sans noms : le nom de la section est le titre de l'écran |
 | **Entrées** | Peu : entre quatre et six. Toujours **Connexion** et **Réglages** ; presque toujours **À traiter** |
 | **À traiter** | Une grille de tuiles, une par type de chose à faire, avec son nombre. Une tuile ouvre sa liste. Le compteur de l'onglet ne compte que ce qui attend une décision |
-| **Connexion** | Une tuile par service extérieur, avec un voyant. Le service ouvert dit ce que l'appli y lit et y écrit, et porte ses gestes : **Vérifier** (compare, n'écrit rien) et **Synchroniser** (écrit ce qui est sûr, envoie le reste dans À traiter) |
+| **Connexion** | Écran commun (0.10.0, contrat 3 : `frontend/src/lib/services/`, recopié tel quel). Une fiche par service extérieur : point et état en mots (Répond, Ne répond pas, Relié, Pas relié), **Ce qui est lu**, **Ce qui est écrit**, « Pour le relier, dans la stack » s'il n'est pas relié, âge du dernier essai. **De 1 à 3 services : fiches dépliées ; à partir de 4 : tuiles à voyant, la fiche s'ouvre dessous au toucher.** Gestes : **Vérifier** (contour, ne teste que ce service, essai léger sans écriture ni coût) et au plus un geste qui écrit (plein : Synchroniser, Livrer…). Le dossier de données n'est pas un service : il est dans Réglages. Données : `GET /api/maison/services` (session ou `ANNEAU_CLE`) |
 | **Réglages** | Ce qui n'est pas un service : réglages d'usage, « Restaurer les réglages », règles, journal des écritures avec Annuler, version, déconnexion (motif au § 8) |
 | **Habillage** | Fonds neutres chauds, filets fins, **toujours sombre** (depuis le 13/11/2026 : le thème clair est retiré, quel que soit le réglage de l'appareil, pour que toutes les applis se ressemblent ouvertes seules ou dans l'Anneau). Inter. Titres d'écran grands et fins |
 | **Couleur** | Une par appli. Elle porte l'action attendue (un seul bouton plein par bloc), l'onglet actif, les compteurs |
@@ -75,8 +75,8 @@ Sur iPhone, dans un écran où l'on valide à la chaîne, la pilule s'efface pou
 ## 6. Partir du socle pour une nouvelle appli
 
 1. Copier ce dépôt, changer `APPLI` (`app/config.py`), le nom affiché et la couleur `--app` (`frontend/src/app.css`).
-2. Remplacer « Synthèse » par l'écran de travail ou par « À traiter » ; garder « Connexion » (`pages/Services.svelte`) et « Réglages ». Retirer « Composants » et « Documents ».
-3. Une tuile par service dans Connexion ; chaque route qui écrit commence par `exiger_ecriture(...)`.
+2. Remplacer « Synthèse » par l'écran de travail ou par « À traiter » ; garder « Connexion » (`$lib/services/Services.svelte`, commun) et « Réglages ». Retirer « Composants » et « Documents ».
+3. Déclarer chaque service extérieur dans `SERVICES` (`maison.Services`, voir `app/main.py`) avec un essai léger, puis `maison.monter_services(...)` après la garde ; chaque route qui écrit commence par `exiger_ecriture(...)`.
 4. Remplacer les deux réglages de démonstration (`REGLAGES_DEFAUTS`, `REGLAGES_VARIABLES`, `EXCLUS_SAUVEGARDE` dans `app/main.py`, table `NOMS` dans `pages/Reglages.svelte`) par ceux de l'appli ; garder les routes de sauvegarde et de restauration telles quelles (§ 8).
 5. Écrire `docs/dossier.md`, `REPRISE.md`, `CHANGELOG.md`.
 
@@ -93,7 +93,7 @@ Comparaison des applis en service avec ce document. Rien n'est corrigé d'office
 | carnet, Sillage, l'Anneau | Trois ors voisins. **Tranché le 14/11/2026** : l'Anneau garde l'or, carnet passe en argent (2.18.2), Sillage en lavande (0.10.1). | — |
 | Transhumance | Les demandes de Millésime arrivent dans Migrer, pas dans une tuile « À traiter ». | faible, même raison |
 | Sillage | Pas d'« À traiter » ; ce qui attend une décision est la tuile « À vérifier » dans Sillages. Pas de journal des écritures : Sillage n'écrit que dans sa propre base (corrections, récits, hôtes). | conforme à l'esprit (§ 2) |
-| l'Anneau | Pas de rail : l'écran d'ouverture est l'anneau lui-même ; pas d'écran « Connexion » des services, puisqu'il est lui-même la vue des services. Pas de mode lecture seule : il n'écrit chez aucun service. | voulu, écrit dans son dossier |
+| l'Anneau | Pas de rail : l'écran d'ouverture est l'anneau lui-même. Pas d'écran « Connexion » à lui ; depuis le 20/11/2026, sa fiche « État » d'une appli montre les fiches de cette appli (contrat 3, avec Vérifier). Pas de mode lecture seule : il n'écrit chez aucun service. | voulu, écrit dans son dossier |
 | Millésime | Le refus en lecture seule passe par une exception (`LectureSeule`) au lieu de `exiger_ecriture` : même effet, autre nom. | aucun |
 | carnet, Millésime | Noms de variables de couleur propres (`--color-onglet`, `--color-lie`) au lieu de `--app` : même rendu. | aucun ; à harmoniser seulement si l'habillage est refait |
 | vérification des dates | Page servie par Flask, sans Svelte : choix du conseil 2.0 (ne pas réécrire un serveur qui modifie des originaux). | voulu |
@@ -148,3 +148,16 @@ Le middleware de session ne garde que `/api/…` : `/externe/…` vérifie son j
 
 1. Nouvelle image **avec la stack actuelle** : au premier démarrage, chaque réglage est repris de son ancienne variable. Vérifier l'écran Réglages.
 2. Nouvelle stack **sans les anciennes lignes** de réglage. Retirer une ligne avant le premier démarrage ferait perdre sa valeur (le réglage prendrait sa valeur par défaut).
+
+## 9. Fiches « Connexion » (20/11/2026, contrat 3)
+
+Choix du 20/11/2026 (dossier et conseil « fiches Connexion ») : le même écran dans toutes les applis, au format de Douze points 1.8.0.
+
+- **Serveur** : `SERVICES = maison.Services(APPLI)` puis `SERVICES.ajouter(id, nom, lit=…, ecrit=…, regle=…, reglage=…, essai=…, genre=…, cible=…, geste=…, derniere_ecriture=…)` ; `maison.monter_services(app, SERVICES, session_ok)` **après** la garde. `id` vient de la liste fermée du coffre (immich, carnet, home-assistant, icloud…).
+- **Essai léger, par règle** : une lecture courte (version, état) ; jamais d'écriture, d'appel payant ni de réveil (un PC en veille donne « ne répond pas »). Au plus un essai toutes les 30 s par service ; arrêté au bout de 8 s. `maison.essai_http(adresse)` sert pour les services HTTP.
+- **Le GET ne lance aucun essai** : il rend le dernier résultat et son âge (`verifie_le`). Un geste de l'appli qui vient de joindre le service le note (`SERVICES.noter(id, ok, phrase)`).
+- **Détail nettoyé** : secrets, adresses et hôtes retirés, une ligne, 160 caractères.
+- **Accès** : la session de l'appli, ou `ANNEAU_CLE` (clé de lecture de l'Anneau, n'ouvre que ces deux routes). `MAISON_JETON` n'ouvre pas les fiches.
+- **Interface** : `$lib/services/Services.svelte` (écran) et `FicheService.svelte` (fiche), recopiés et signés par `tools/diffuser_maison.py` ; le test de chaque appli recalcule l'empreinte (`maison.empreinte_interface`). L'appli passe `ongeste(service, geste)` pour son geste qui écrit. Classes Tailwind sur les jetons communs (`card`, `border`, `muted-foreground`, `primary`, `destructive`, `input`) et `.titre`, `.etiquette`.
+- **Bac à sable** : `maison.Services(APPLI, simule=True)` : bandeau « Simulé » sur ses fiches.
+

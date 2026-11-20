@@ -25,7 +25,7 @@ Avant de créer une appli : [`docs/format.md`](docs/format.md) (le format) et [`
 ## Déployer sur le NAS (Portainer)
 
 1. Dans la stack `homelab.yml`, ajouter le service de `docker-compose.yml`.
-2. Dans les variables de la stack : `MAISON_PASSWORD` (12 caractères au moins), `MAISON_JETON` (pour la sauvegarde des réglages par l'Anneau) et `SOCLE_DATA_DIR` (voir `.env.example`).
+2. Dans les variables de la stack : `MAISON_PASSWORD` (12 caractères au moins), `MAISON_JETON` (pour la sauvegarde des réglages par l'Anneau), `ANNEAU_CLE` (pour que l'Anneau lise les fiches « Connexion ») et `SOCLE_DATA_DIR` (voir `.env.example`).
 3. Créer le dossier indiqué dans `SOCLE_DATA_DIR` avec File Station.
 4. Mettre à jour la stack, puis ouvrir `http://<adresse du NAS>:8090`.
 
@@ -66,5 +66,6 @@ python -m pytest -q
 - Aucun secret ni donnée personnelle dans ce dépôt : tout passe par les variables de la stack.
 - L'appli refuse de démarrer sans `MAISON_PASSWORD` d'au moins 12 caractères.
 - `/externe/sauvegarde` ne s'ouvre qu'au jeton commun (`MAISON_JETON`) et ne rend que les réglages d'usage, jamais un secret ni une variable.
+- `/api/maison/services` (fiches « Connexion », contrat 3) s'ouvre à la session ou à `ANNEAU_CLE`, jamais à `MAISON_JETON` ; « Vérifier » n'écrit rien, au plus un essai toutes les 30 s.
 - Toutes les routes `/api/` exigent une session, sauf la connexion ; `/health` est publique et ne dit que la version.
 - Versions épinglées (`requirements.txt`, `package.json`) ; retour arrière par l'étiquette de l'image (`SOCLE_VERSION`).

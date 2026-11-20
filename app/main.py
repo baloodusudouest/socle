@@ -2,7 +2,9 @@
 
 Routes : /health (publique), /api/session, /api/connexion, /api/deconnexion,
 /api/synthese (mesures réelles du conteneur), /api/reglages et /api/restaurer (0.6.0),
-/externe/sauvegarde (jeton commun, pour l'Anneau), puis l'interface.
+/externe/sauvegarde (jeton commun, pour l'Anneau), /api/maison/services et
+/api/maison/services/{id}/verifier (0.10.0, contrat 3 : session ou ANNEAU_CLE, voir maison.monter_services),
+puis l'interface.
 """
 from __future__ import annotations
 
@@ -110,6 +112,22 @@ def exiger_ecriture(quoi: str = "") -> None:
     (iCloud, Immich, fichiers d'une photothèque…). Le refus arrive avant toute trace dans un journal."""
     if ETAT["cfg"].lecture_seule:
         raise LectureSeule(f"Mode lecture seule : rien n'est écrit{' dans ' + quoi if quoi else ''}.")
+
+
+# ================================================================ fiches « Connexion » (0.10.0, contrat 3)
+# Une fiche par service extérieur : ce que l'appli y lit, ce qu'elle y écrit, la variable qui le relie, et un essai
+# LÉGER (rien d'écrit, rien de payant, rien de réveillé). Le dossier de données n'est pas un service : il est dans
+# Réglages. Le socle n'a qu'un service : l'Anneau (annuaire et sauvegardes, pour « Restaurer »).
+SERVICES = maison.Services(APPLI)
+SERVICES.ajouter(
+    "anneau", "L'Anneau", genre="maison", cible="anneau",
+    lit="L'annuaire des adresses des applis et les sauvegardes de nuit des réglages, pour « Restaurer ».",
+    ecrit="Rien.",
+    regle=lambda: bool(maison.jeton_a_envoyer()), reglage="MAISON_JETON",
+    essai=lambda: maison.essai_http(maison.adresse_anneau()),
+)
+# Monté APRÈS la garde : le dernier middleware ajouté passe en premier (la garde ne voit pas ces deux routes).
+maison.monter_services(app, SERVICES, lambda r: "sessions" in ETAT and ETAT["sessions"].connecte(r.cookies))
 
 
 @app.exception_handler(LectureSeule)

@@ -14,6 +14,7 @@ services:
       - TZ=Europe/Paris
       - MAISON_PASSWORD=${MAISON_PASSWORD}                 # mot de passe commun à toutes les applis (12 caractères au moins)
       - MAISON_JETON=${MAISON_JETON:-}                     # jeton commun : l'Anneau lit /externe/sauvegarde ; vide = porte fermée
+      - ANNEAU_CLE=${ANNEAU_CLE:-}                         # 0.10.0 : l'Anneau lit les fiches « Connexion » ; vide = porte fermée
       - MAISON_LECTURE_SEULE=${MAISON_LECTURE_SEULE:-}     # « oui » : aucune appli n'écrit hors de chez elle
       - APP_LECTURE_SEULE=${APP_LECTURE_SEULE:-}           # forçage pour le socle seul : « oui » ou « non » l'emporte
       # - MAISON_ANNEAU_URL=http://anneau:8094             # facultatif : adresse de l'Anneau dans la stack (défaut)
