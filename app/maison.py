@@ -1,5 +1,6 @@
 """Module commun des applis maison — contrat 3 (20/11/2026 ; contrat 1 : variables communes, contrat 2 : réglages et
-sauvegarde, contrat 3 : fiches « Connexion » communes, /api/maison/services), socle 0.10.0 (voir VERSION_SOCLE).
+sauvegarde, contrat 3 : fiches « Connexion » communes, /api/maison/services), socle 0.11.0 (voir VERSION_SOCLE ;
+0.11.0 : guide facultatif d'une fiche — réglages lus, « Allumer normalement », « En cas de problème », installation).
 
 Fichier de référence : baloodusudouest/socle, app/maison.py. Il est copié TEL QUEL dans chaque appli
 (tools/diffuser_maison.py) ; ne jamais le modifier ailleurs que dans le socle. La dernière ligne porte une
@@ -60,7 +61,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 CONTRAT = 3
-VERSION_SOCLE = "0.10.0"      # version du socle d'où vient ce fichier (publiée dans /health : version_socle)
+VERSION_SOCLE = "0.11.0"      # version du socle d'où vient ce fichier (publiée dans /health : version_socle)
 VRAI = {"oui", "1", "true", "yes", "vrai"}
 FAUX = {"non", "0", "false", "no", "faux"}
 
@@ -859,6 +860,30 @@ def nettoyer_detail(texte) -> str | None:
     return t if len(t) <= LONGUEUR_MESSAGE else t[:LONGUEUR_MESSAGE - 1] + "…"
 
 
+def _textes(v, n: int = 30, long: int = 600) -> list[str]:
+    return [str(x)[:long] for x in (v if isinstance(v, list) else [])[:n] if isinstance(x, (str, int, float))]
+
+
+def nettoyer_guide(g) -> dict | None:
+    """Guide d'une fiche (0.11.0) relu champ par champ : clés connues, textes bornés, secrets masqués. None si vide."""
+    if not isinstance(g, dict):
+        return None
+    m = masquer_secrets
+    sortie = {
+        "reglages": [{"nom": m(str(r.get("nom", "")))[:80], "valeur": m(str(r.get("valeur", "")))[:300]}
+                     for r in (g.get("reglages") or [])[:20] if isinstance(r, dict) and r.get("nom")],
+        "allumer": [m(x) for x in _textes(g.get("allumer"))],
+        "pannes": [{"signe": m(str(p.get("signe", "")))[:200], "faire": [m(x) for x in _textes(p.get("faire"), 12)],
+                    "commandes": [m(x) for x in _textes(p.get("commandes"), 8, 400)]}
+                   for p in (g.get("pannes") or [])[:20] if isinstance(p, dict) and p.get("signe")],
+        "une_fois": [{"texte": m(str(u.get("texte", "")))[:600], "commande": m(str(u.get("commande", "") or ""))[:400]}
+                     for u in (g.get("une_fois") or [])[:20] if isinstance(u, dict) and u.get("texte")],
+        "terminal": m(str(g.get("terminal") or ""))[:200],
+        "note": m(str(g.get("note") or ""))[:600],
+    }
+    return sortie if any(sortie.values()) else None
+
+
 def _valeur(v):
     return v() if callable(v) else v
 
@@ -876,6 +901,11 @@ class Services:
       genre              « exterieur » ou « maison » (une autre appli maison ; cible = sa clé)
       geste              {"id", "nom"} : au plus un geste qui écrit (Synchroniser, Livrer…), porté par l'appli
       derniere_ecriture  fonction rendant une date ISO (ou None) : dernière écriture de l'appli chez ce service
+      guide              (0.11.0) dict ou fonction rendant un dict, pour un service qu'on allume et répare soi-même
+                         (PC de calcul, IA du PC) : {"reglages": [{"nom", "valeur"}], "allumer": [phrase],
+                         "pannes": [{"signe", "faire": [phrase], "commandes": [ligne]}], "une_fois": [{"texte", "commande"}],
+                         "terminal": phrase (où taper les commandes), "note": phrase}. Tout est facultatif ; rien de
+                         secret (le guide s'affiche aussi dans l'Anneau).
     """
 
     def __init__(self, appli: str, simule: bool = False, delai_s: float = DELAI_VERIFIER_S,
@@ -891,7 +921,7 @@ class Services:
 
     def ajouter(self, id: str, nom: str, *, lit: str, ecrit: str, regle=True, essai=None, reglage: str | None = None,
                 genre: str = "exterieur", cible: str | None = None, geste: dict | None = None,
-                derniere_ecriture=None) -> "Services":
+                derniere_ecriture=None, guide=None) -> "Services":
         if not _ID_SERVICE.match(id or ""):
             raise ValueError(f"identifiant de service invalide : {id!r}")
         if id in self._def:
@@ -903,7 +933,7 @@ class Services:
         self._ordre.append(id)
         self._def[id] = {"id": id, "nom": nom, "lit": lit, "ecrit": ecrit or "Rien.", "regle": regle, "essai": essai,
                          "reglage": reglage, "genre": genre, "cible": cible, "geste": geste,
-                         "derniere_ecriture": derniere_ecriture}
+                         "derniere_ecriture": derniere_ecriture, "guide": guide}
         return self
 
     def ids(self) -> list[str]:
@@ -926,12 +956,16 @@ class Services:
             ecriture = _valeur(d["derniere_ecriture"]) if d["derniere_ecriture"] is not None else None
         except Exception:                                 # noqa: BLE001
             ecriture = None
+        try:
+            guide = nettoyer_guide(_valeur(d["guide"])) if d["guide"] is not None else None
+        except Exception:                                 # noqa: BLE001 — un guide illisible n'empêche pas la fiche
+            guide = None
         return {"id": id, "nom": d["nom"], "genre": d["genre"], "cible": d["cible"], "etat": etat,
                 "lit": d["lit"], "ecrit": d["ecrit"], "reglage": d["reglage"] if not regle else None,
                 "detail": dernier.get("detail") if regle else None,
                 "verifie_le": dernier.get("le") if regle else None,
                 "derniere_ecriture": ecriture if isinstance(ecriture, str) else None,
-                "gestes": [dict(d["geste"])] if d["geste"] else []}
+                "gestes": [dict(d["geste"])] if d["geste"] else [], "guide": guide}
 
     def liste(self) -> dict:
         """Réponse de GET /api/maison/services : aucun essai lancé, le dernier résultat et son âge."""
@@ -1088,4 +1122,4 @@ def empreinte_interface(chemin: str | Path) -> tuple[str, str]:
         return "", hashlib.sha256(texte.rstrip("\n").encode("utf-8")).hexdigest()[:16]
     corps, fin = texte.rsplit(MARQUE_INTERFACE, 1)
     return fin.replace("-->", "").strip(), hashlib.sha256(corps.rstrip("\n").encode("utf-8")).hexdigest()[:16]
-# empreinte: 154366d626a28fd1
+# empreinte: d1a04ca3d55fe032

@@ -160,4 +160,5 @@ Choix du 20/11/2026 (dossier et conseil « fiches Connexion ») : le même écra
 - **Accès** : la session de l'appli, ou `ANNEAU_CLE` (clé de lecture de l'Anneau, n'ouvre que ces deux routes). `MAISON_JETON` n'ouvre pas les fiches.
 - **Interface** : `$lib/services/Services.svelte` (écran) et `FicheService.svelte` (fiche), recopiés et signés par `tools/diffuser_maison.py` ; le test de chaque appli recalcule l'empreinte (`maison.empreinte_interface`). L'appli passe `ongeste(service, geste)` pour son geste qui écrit. Classes Tailwind sur les jetons communs (`card`, `border`, `muted-foreground`, `primary`, `destructive`, `input`) et `.titre`, `.etiquette`.
 - **Bac à sable** : `maison.Services(APPLI, simule=True)` : bandeau « Simulé » sur ses fiches.
+- **Guide** (0.11.0) : un service qu'on allume et répare soi-même (PC de calcul, IA du PC) porte `guide={reglages, allumer, pannes, une_fois, terminal, note}`, au format de la fiche « IA du PC » de Gazette. Rien de secret : le guide s'affiche aussi dans l'Anneau.
 

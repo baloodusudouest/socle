@@ -7,7 +7,9 @@
   //
   // service : une entrée de GET /api/maison/services
   //   { id, nom, etat (repond | ne_repond_pas | relie | pas_relie), lit, ecrit, reglage, detail,
-  //     verifie_le, derniere_ecriture, gestes: [{ id, nom }] }
+  //     verifie_le, derniere_ecriture, gestes: [{ id, nom }], guide (0.11.0, facultatif) }
+  // guide : { reglages: [{ nom, valeur }], allumer: [phrase], pannes: [{ signe, faire: [phrase], commandes: [ligne] }],
+  //           une_fois: [{ texte, commande }], terminal, note } — pour un service qu'on allume et répare soi-même
   // onverifier(service) : lance « Vérifier » (contour, ne teste que ce service, n'écrit rien)
   // ongeste(service, geste) : le geste qui écrit (Synchroniser, Livrer…), seul bouton plein de la fiche
   // enCours : « verifier », l'id du geste en cours, ou ''
@@ -28,6 +30,21 @@
   const MOTS = { repond: 'Répond', ne_repond_pas: 'Ne répond pas', relie: 'Relié', pas_relie: 'Pas relié' }
   const regle = $derived(service.etat !== 'pas_relie')
   const geste = $derived(service.gestes?.[0] ?? null)
+
+  const guide = $derived(service.guide ?? null)
+  let copie = $state('')
+  async function copier(texte) {
+    try { await navigator.clipboard.writeText(texte) } catch {
+      const zone = document.createElement('textarea')
+      zone.value = texte
+      document.body.appendChild(zone)
+      zone.select()
+      try { document.execCommand('copy') } catch { /* rien */ }
+      zone.remove()
+    }
+    copie = texte
+    setTimeout(() => { if (copie === texte) copie = '' }, 1500)
+  }
 
   // « il y a 3 h » : l'âge d'une date ISO, en mots
   function age(iso) {
@@ -115,5 +132,45 @@
       {/if}
     </div>
   {/if}
+  {#if guide}
+    {#snippet commande(texte)}
+      <span class="mt-1.5 flex items-start gap-2">
+        <code class="min-w-0 flex-1 whitespace-pre-wrap break-all rounded-lg bg-background/70 px-2.5 py-1.5 font-mono text-xs">{texte}</code>
+        <button type="button" class="min-h-8 shrink-0 rounded-lg border px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                aria-label="Copier la commande" onclick={() => copier(texte)}>{copie === texte ? 'Copié' : 'Copier'}</button>
+      </span>
+    {/snippet}
+    {#if guide.reglages?.length}
+      <dl class="mt-5 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">
+        {#each guide.reglages as r}<dt class="text-muted-foreground">{r.nom}</dt><dd class="break-words">{r.valeur}</dd>{/each}
+      </dl>
+    {/if}
+    {#if guide.allumer?.length}
+      <svelte:element this={'h' + (titreNiveau + 1)} class="mt-5 font-semibold">Allumer normalement</svelte:element>
+      <ol class="mt-2 grid list-decimal gap-1.5 pl-5 text-sm">{#each guide.allumer as etape}<li>{etape}</li>{/each}</ol>
+    {/if}
+    {#if guide.pannes?.length}
+      <svelte:element this={'h' + (titreNiveau + 1)} class="mt-5 font-semibold">En cas de problème</svelte:element>
+      {#if guide.terminal}<p class="text-xs text-muted-foreground">{guide.terminal}</p>{/if}
+      <div class="mt-2 grid gap-2">
+        {#each guide.pannes as p}
+          <details class="rounded-xl border px-3 py-2 open:bg-background/40">
+            <summary class="min-h-8 cursor-pointer py-1 text-sm font-medium">{p.signe}</summary>
+            {#if p.faire?.length}<ul class="mt-2 grid list-disc gap-1 pl-5 text-sm">{#each p.faire as x}<li>{x}</li>{/each}</ul>{/if}
+            {#each p.commandes ?? [] as c}{@render commande(c)}{/each}
+          </details>
+        {/each}
+      </div>
+    {/if}
+    {#if guide.une_fois?.length}
+      <details class="mt-4 rounded-xl border px-3 py-2">
+        <summary class="min-h-8 cursor-pointer py-1 text-sm font-medium">Installation (une seule fois)</summary>
+        <ol class="mt-2 grid list-decimal gap-2 pl-5 text-sm">
+          {#each guide.une_fois as u}<li>{u.texte}{#if u.commande}{@render commande(u.commande)}{/if}</li>{/each}
+        </ol>
+      </details>
+    {/if}
+    {#if guide.note}<p class="mt-3 text-xs text-muted-foreground">{guide.note}</p>{/if}
+  {/if}
 </article>
-<!-- empreinte: 6a86c294c48baf9b -->
+<!-- empreinte: 947654bb1025d927 -->

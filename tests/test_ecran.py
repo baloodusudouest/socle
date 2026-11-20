@@ -179,7 +179,11 @@ def _ajouter_faux(n):
     for i, id_ in enumerate(ids):
         reg.ajouter(id_, f"Service {i + 1}", lit="Les fiches et leurs photos.", ecrit="Rien." if i % 2 else "Les albums de la soirée.",
                     regle=i != 2, reglage="FAUX_URL", essai=lambda: (True, "Version 1.0."),
-                    geste={"id": "synchroniser", "nom": "Synchroniser"} if i == 0 else None)
+                    geste={"id": "synchroniser", "nom": "Synchroniser"} if i == 0 else None,
+                    guide={"reglages": [{"nom": "Adresse appelée", "valeur": "http://192.0.2.9:8000"}],
+                           "allumer": ["Allumer le PC.", "Ouvrir le calculateur."],
+                           "pannes": [{"signe": "« PC injoignable »", "faire": ["Le PC est-il allumé ?"], "commandes": ["ipconfig"]}],
+                           "terminal": "Les commandes se tapent dans PowerShell sur le PC."} if i == 0 else None)
 
     def retirer():
         for id_ in ids:
@@ -202,6 +206,12 @@ def test_connexion_fiches_depliees_jusqu_a_trois(navigateur, adresse, taille):
         carte.get_by_text("Répond", exact=True).wait_for()
         carte.get_by_text("Vérifié à l'instant").wait_for()
         assert carte.get_by_role("button", name="Synchroniser").count() == 0   # le socle ne porte pas de geste
+        # 0.11.0 : le guide (réglages lus, Allumer normalement, En cas de problème, commande à copier)
+        carte.get_by_text("Allumer normalement").wait_for()
+        carte.get_by_text("http://192.0.2.9:8000").wait_for()
+        carte.get_by_text("« PC injoignable »").click()
+        carte.get_by_role("button", name="Copier la commande").click()
+        carte.get_by_text("Copié").wait_for()
         sans_debordement(page)
         assert erreurs == []
         page.close()

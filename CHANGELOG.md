@@ -1,5 +1,10 @@
 # Journal des versions
 
+## 0.11.0 — 20 novembre 2026 (guide d'une fiche « Connexion »)
+- Une fiche peut porter un **guide** (facultatif, `SERVICES.ajouter(..., guide=…)`) pour un service qu'on allume et répare soi-même (PC de calcul, IA du PC), au format de la fiche « IA du PC » de Gazette : réglages lus (adresse appelée, modèle…), « Allumer normalement », « En cas de problème » (signes dépliables, quoi faire, commandes avec « Copier »), « Installation (une seule fois) », une note. Relu et borné par `maison.nettoyer_guide` (secrets masqués) ; un guide illisible n'empêche pas la fiche.
+- `FicheService.svelte` l'affiche sous les boutons ; l'Anneau le montre aussi dans sa fiche « État ».
+- `VERSION_SOCLE = "0.11.0"` ; le contrat reste 3 (champ ajouté, facultatif).
+
 ## 0.10.0 — 20 novembre 2026 (fiches « Connexion » communes, contrat 3)
 - **Contrat 3** dans `maison.py` (`CONTRAT = 3`, `VERSION_SOCLE = "0.10.0"`) : registre `Services` (`ajouter`, `liste`, `verifier`, `verifier_async`, `noter`), `monter_services(app, registre, session_ok)` qui branche `GET /api/maison/services` et `POST /api/maison/services/{id}/verifier` avant la garde de l'appli ; `cle_anneau`, `cle_anneau_valide`, `nettoyer_detail`, `adresse_anneau`, `essai_http`, `empreinte_interface`.
 - Le GET ne lance aucun essai : il rend le dernier résultat et son âge. « Vérifier » : un essai léger, au plus un toutes les 30 s par service, arrêté au bout de 8 s, sans écriture (permis en lecture seule). Détail nettoyé (secrets, adresses, hôtes ; 160 caractères).

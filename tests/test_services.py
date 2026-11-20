@@ -23,7 +23,8 @@ def test_liste_du_socle(client):  # noqa: F811
     assert corps["contrat"] == 3 and corps["appli"] == "socle" and corps["simule"] is False
     (s,) = corps["services"]
     assert set(s) == {"id", "nom", "genre", "cible", "etat", "lit", "ecrit", "reglage", "detail", "verifie_le",
-                      "derniere_ecriture", "gestes"}
+                      "derniere_ecriture", "gestes", "guide"}
+    assert s["guide"] is None
     assert s["id"] == "anneau" and s["genre"] == "maison" and s["cible"] == "anneau"
 
 
@@ -160,3 +161,19 @@ def test_empreintes_de_l_interface_commune():
     for nom in maison.FICHIERS_INTERFACE:
         ecrite, calculee = maison.empreinte_interface(RACINE / "frontend" / "src" / "lib" / "services" / nom)
         assert ecrite and ecrite == calculee, nom
+
+
+def test_guide_relu_et_nettoye():
+    guide = {"reglages": [{"nom": "Adresse appelée", "valeur": "http://192.0.2.5:8000"}, {"valeur": "sans nom"}],
+             "allumer": ["Allumer le PC.", {"pas": "un texte"}],
+             "pannes": [{"signe": "PC injoignable", "faire": ["Vérifier le pare-feu."], "commandes": ["ipconfig", "curl -H 'Authorization: Bearer abc123'"]}],
+             "une_fois": [{"texte": "Ouvrir le port", "commande": "netsh …"}], "terminal": "PowerShell", "inconnu": "x"}
+    reg = maison.Services("essai").ajouter("pc-calcul", "PC de calcul", lit="x", ecrit="x", guide=lambda: guide)
+    g = reg.liste()["services"][0]["guide"]
+    assert set(g) == {"reglages", "allumer", "pannes", "une_fois", "terminal", "note"}
+    assert g["reglages"] == [{"nom": "Adresse appelée", "valeur": "http://192.0.2.5:8000"}]
+    assert g["allumer"] == ["Allumer le PC."] and g["pannes"][0]["commandes"][0] == "ipconfig"
+    assert "abc123" not in g["pannes"][0]["commandes"][1]
+    assert maison.nettoyer_guide({}) is None and maison.nettoyer_guide("texte") is None
+    reg2 = maison.Services("essai").ajouter("a", "A", lit="x", ecrit="x", guide=lambda: 1 / 0)
+    assert reg2.liste()["services"][0]["guide"] is None
