@@ -1,5 +1,8 @@
 # Journal des versions
 
+## 0.11.1 — 20 novembre 2026 (« Pour le relier » quand ce n'est pas la stack)
+- `FicheService.svelte` : quand le champ `reglage` parle de Réglages (un réglage de l'appli : recherche Wikidata de Comptoir, Larousse de Gazette, adresse de la liseuse du kit, tags de Sillage), le titre devient « Pour le relier » au lieu de « Pour le relier, dans la stack ». Relevé par les applis passées au contrat 3 le même jour.
+
 ## 0.11.0 — 20 novembre 2026 (guide d'une fiche « Connexion »)
 - Une fiche peut porter un **guide** (facultatif, `SERVICES.ajouter(..., guide=…)`) pour un service qu'on allume et répare soi-même (PC de calcul, IA du PC), au format de la fiche « IA du PC » de Gazette : réglages lus (adresse appelée, modèle…), « Allumer normalement », « En cas de problème » (signes dépliables, quoi faire, commandes avec « Copier »), « Installation (une seule fois) », une note. Relu et borné par `maison.nettoyer_guide` (secrets masqués) ; un guide illisible n'empêche pas la fiche.
 - `FicheService.svelte` l'affiche sous les boutons ; l'Anneau le montre aussi dans sa fiche « État ».

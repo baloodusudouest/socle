@@ -230,7 +230,7 @@ def test_sante_sans_jeton_sans_messages(monkeypatch):
     with pytest.raises(RuntimeError), maison.TACHES.tour("synchro-icloud"):
         raise RuntimeError("refus du serveur")
     s = maison.sante(requete(), jeton_commun=("jeton-commun-invente",))
-    assert s["version_socle"] == "0.11.0" and s["copie_base"] is None
+    assert s["version_socle"] == "0.11.1" and s["copie_base"] is None
     assert "message" not in s["taches"][0] and s["taches"][0]["derniere_erreur"]
     faux = maison.sante(requete({"authorization": "Bearer autre-jeton"}), jeton_commun=("jeton-commun-invente",))
     assert "message" not in faux["taches"][0]
@@ -264,7 +264,7 @@ def client(tmp_path, monkeypatch):
 
 def test_health_du_socle(client):
     s = client.get("/health").json()
-    assert s["ok"] is True and s["version"] and s["version_socle"] == "0.11.0" and s["copie_base"] is None
+    assert s["ok"] is True and s["version"] and s["version_socle"] == "0.11.1" and s["copie_base"] is None
     assert s["taches"][0]["nom"] == "demo" and "message" not in s["taches"][0]
     avec = client.get("/health", headers={"Authorization": "Bearer jeton-commun-invente"}).json()
     assert avec["taches"][0]["message"] == "RuntimeError: panne inventée"

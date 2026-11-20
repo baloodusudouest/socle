@@ -30,6 +30,7 @@
   const MOTS = { repond: 'Répond', ne_repond_pas: 'Ne répond pas', relie: 'Relié', pas_relie: 'Pas relié' }
   const regle = $derived(service.etat !== 'pas_relie')
   const geste = $derived(service.gestes?.[0] ?? null)
+  // 0.11.1 : « reglage » qui parle de Réglages (un réglage de l'appli, pas une variable) : « Pour le relier » seul
 
   const guide = $derived(service.guide ?? null)
   let copie = $state('')
@@ -91,7 +92,7 @@
     </div>
     {#if !regle && service.reglage}
       <div>
-        <dt class="text-sm text-muted-foreground">Pour le relier, dans la stack</dt>
+        <dt class="text-sm text-muted-foreground">{/Réglages/.test(service.reglage) ? 'Pour le relier' : 'Pour le relier, dans la stack'}</dt>
         <dd class="mt-0.5 font-mono text-sm">{service.reglage}</dd>
       </div>
     {/if}
@@ -173,4 +174,4 @@
     {#if guide.note}<p class="mt-3 text-xs text-muted-foreground">{guide.note}</p>{/if}
   {/if}
 </article>
-<!-- empreinte: 947654bb1025d927 -->
+<!-- empreinte: 671e279c00aeaa1f -->
