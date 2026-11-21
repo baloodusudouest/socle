@@ -296,6 +296,14 @@ clé    = PBKDF2-SHA256(mot de passe commun, sel "maison-session|", 200 000 tour
 - **Heure de Paris, pas celle du conteneur** : `maison.planifier_copie` calcule l'heure en Europe/Paris quel que soit `TZ` (et sait faire sans données de fuseau) ; heures étalées par appli dans `maison.HEURES_COPIE`. Une heure qui n'existe pas (passage à l'heure d'été) tombe une heure plus tard. Attente par morceaux d'une heure : une horloge qui saute ne fait pas rater la nuit.
 - **Une copie jamais remise en place ne prouve rien** : répéter la restauration (arrêter, remettre la copie, enlever `-wal`/`-shm`, redémarrer, contrôler) avant de dire que c'est fini.
 
+## 23. Ranger des papiers dans Paperless (socle 0.12.0, 21/11/2026)
+
+- Sonder la vraie installation avant de coder, avec de faux papiers, et noter seulement des formes et des codes : c'est la sonde qui a montré que Paperless 3 accepte les doublons et que ses tâches ne se retrouvent pas par leur identifiant.
+- Un compte par appli, droits minimaux (Document, Tag, DocumentType : Add et View ; ni Delete ni Change). Une règle donne au propriétaire humain tout ce qui arrive par le dossier d'arrivée et le courrier ; un document sans propriétaire est visible par tous les comptes.
+- Une règle qui ouvre un document à un compte ne lui retire jamais l'accès quand la condition cesse : l'écrire dans la note du service.
+- Retrouver un envoi par son titre unique ; chercher avant d'envoyer ; ne jamais renvoyer automatiquement un envoi parti.
+- Deux jetons qui se ressemblent se confondent : mettre un prénom sur chaque compte de service et faire refuser deux jetons identiques par les outils.
+
 ## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.

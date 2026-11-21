@@ -2,8 +2,9 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
-## État (20/11/2026)
+## État (21/11/2026)
 
+- **0.12.0** (21/11/2026) : client Paperless commun `app/paperless.py` (signé, diffusé par `tools/diffuser_maison.py --paperless`) et faux Paperless des tests `tests/faux_paperless.py`. Premières applis : Gazette, Dîme. `maison.py` inchangé. **Jamais essayé sur la vraie installation.**
 - **0.11.1** (20/11/2026) : titre « Pour le relier » quand `reglage` parle de Réglages ; rediffusé aux applis.
 - **0.11.0** (20/11/2026) : guide facultatif d'une fiche (`guide=`, `nettoyer_guide`), demandé par Julien pour que le calcul du PC ait les mêmes informations que l'IA du PC.
 - **0.10.0** (20/11/2026, chantier « fiches Connexion », dossier et conseil `fiches-connexion-*.md` dans le projet Claude) : contrat 3 dans `maison.py` (registre `Services`, `monter_services`, `ANNEAU_CLE`), interface commune `frontend/src/lib/services/` (signée et diffusée comme `maison.py`). Diffusé aux applis dans le même chantier (ordre : Douze points, l'Anneau, puis les autres). **Jamais essayé sur la vraie installation.**
@@ -48,6 +49,8 @@ Fichier à lire en premier dans une nouvelle session, et à mettre à jour à ch
 - Animations : transitions natives de Svelte ; motion.dev seulement pour Frise.
 
 ## Pièges
+
+- Paperless 3 (sonde du 21/11/2026) : doublons acceptés, tâches introuvables par `task_id`, un compte ne voit que ses envois et ce qu'une règle lui ouvre. D'où `FileEnvois` : titre unique, recherche avant et après l'envoi, jamais de renvoi automatique. Un renvoi voulu change de titre.
 
 - `maison.TACHES` et la dernière copie vivent en mémoire du processus : jamais `--workers` > 1 dans `uvicorn`. Une copie prévue mais pas encore faite répond `copie_base: {"le": null, "ok": false, …}`.
 

@@ -1,5 +1,15 @@
 # Journal des versions
 
+## 0.12.0 — 21 novembre 2026 (client Paperless commun)
+- Nouveau fichier commun **`app/paperless.py`** (bibliothèque standard, signé comme `maison.py`), pour les applis qui rangent ou lisent des papiers dans Paperless-ngx (Gazette, Dîme ; carnet plus tard). Dossier « Paperless – Gazette et Dîme » v0.3 et sa sonde (coffre, 21/11/2026).
+  - `Paperless(url, jeton, lecture_seule=, transport=)` : `regle`, `essai`, `etiquette`/`type_document` (retrouvés par le nom exact, créés avec l'appariement désactivé), `chercher_titre`, `envoyer_brut`, `documents(etiquette)` (toutes les pages), `texte` (champ `content`, jamais de nouvel OCR), `telecharger` (original). En-tête `Accept: application/json; version=10`. Aucune suppression.
+  - `FileEnvois` : file locale (fichier JSON, ou `charger`/`sauver` fournis par l'appli), **un envoi à la fois**, titre unique exigé, recherche du titre avant d'envoyer, document **retrouvé par son titre** après l'envoi (les tâches de Paperless 3 sont introuvables par leur `task_id`), **jamais de renvoi** d'un envoi parti (Paperless 3 accepte les doublons) : « à vérifier » après 30 min, `reprendre` relance seulement la recherche ; panne réseau : nouvel essai 10 min plus tard ; la file ne garde jamais de PDF (l'appli fournit `lire_source`).
+  - `declarer_service(services, client, file, lit=, ecrit=, reglage=)` : fiche « Connexion » `paperless` (contrat 3), détail avec les envois en attente et à vérifier.
+- `tests/faux_paperless.py` : faux Paperless d'après les formes relevées par la sonde (propriétaire, droits, doublons acceptés, délai de traitement), copié dans les applis avec le client ; `tests/test_paperless.py` (18 tests).
+- `tools/diffuser_maison.py --paperless <applis>` signe et copie `app/paperless.py` et `tests/faux_paperless.py`.
+- `maison.py` inchangé (`VERSION_SOCLE` reste 0.11.1, contrat 3) : rien à rediffuser aux applis qui n'utilisent pas Paperless.
+- **Jamais essayé sur la vraie installation** : seulement contre le faux Paperless (la sonde, elle, a tourné sur la vraie).
+
 ## 0.11.1 — 20 novembre 2026 (« Pour le relier » quand ce n'est pas la stack)
 - `FicheService.svelte` : quand le champ `reglage` parle de Réglages (un réglage de l'appli : recherche Wikidata de Comptoir, Larousse de Gazette, adresse de la liseuse du kit, tags de Sillage), le titre devient « Pour le relier » au lieu de « Pour le relier, dans la stack ». Relevé par les applis passées au contrat 3 le même jour.
 
