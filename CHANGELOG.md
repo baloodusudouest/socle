@@ -1,5 +1,9 @@
 # Journal des versions
 
+## 0.12.1 — 22 novembre 2026 (barre d'onglets collée en bas)
+- **iPhone : la barre d'onglets est collée au bord bas**, sur toute la largeur (choix de Julien, 22/11/2026, pour toutes les applis maison), au lieu de la pilule flottante. Le rail des PC ne change pas. `App.svelte`, `docs/format.md` (Navigation), leçon dans `docs/lecons.md`.
+- Recopié à la main dans chaque appli (le gabarit de navigation n'est pas un fichier commun signé).
+
 ## 0.12.0 — 21 novembre 2026 (client Paperless commun)
 - Nouveau fichier commun **`app/paperless.py`** (bibliothèque standard, signé comme `maison.py`), pour les applis qui rangent ou lisent des papiers dans Paperless-ngx (Gazette, Dîme ; carnet plus tard). Dossier « Paperless – Gazette et Dîme » v0.3 et sa sonde (coffre, 21/11/2026).
   - `Paperless(url, jeton, lecture_seule=, transport=)` : `regle`, `essai`, `etiquette`/`type_document` (retrouvés par le nom exact, créés avec l'appariement désactivé), `chercher_titre`, `envoyer_brut`, `documents(etiquette)` (toutes les pages), `texte` (champ `content`, jamais de nouvel OCR), `telecharger` (original). En-tête `Accept: application/json; version=10`. Aucune suppression.

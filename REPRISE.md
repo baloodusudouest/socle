@@ -2,6 +2,8 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
+## État (22/11/2026) — 0.12.1 : barre d'onglets collée en bas sur iPhone (`App.svelte`, `format.md`, `lecons.md`), recopiée dans les applis le même jour.
+
 ## État (21/11/2026)
 
 - **0.12.0** (21/11/2026) : client Paperless commun `app/paperless.py` (signé, diffusé par `tools/diffuser_maison.py --paperless`) et faux Paperless des tests `tests/faux_paperless.py`. Premières applis : Gazette, Dîme. `maison.py` inchangé. **Jamais essayé sur la vraie installation.**

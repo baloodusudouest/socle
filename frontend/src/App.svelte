@@ -1,5 +1,5 @@
 <script>
-  // Navigation commune aux applis (0.2.0) : rail à gauche sur PC, pilule d'icônes en bas sur iPhone.
+  // Navigation commune aux applis (0.2.0) : rail à gauche sur PC, barre d'icônes collée en bas sur iPhone.
   // Les entrées attendues dans une appli : son écran de travail ou « À traiter » en tuiles,
   // « Connexion » (une tuile par service extérieur) et « Réglages » (ce qui n'est pas un service,
   // la version, la déconnexion). Voir docs/format.md.
@@ -59,12 +59,12 @@
   <Connexion onconnecte={verifier} />
 {:else if connecte}
   <div class="md:pl-52">
-    <!-- iPhone : pilule flottante en bas, icônes seules (le nom de la section est le titre de l'écran).
+    <!-- iPhone : barre d'onglets collée au bord bas (22/11/2026), icônes seules (le nom de la section est le titre de l'écran).
          PC : rail à gauche, avec les noms. Mêmes entrées, même ordre. -->
     <nav
       aria-label="Sections"
-      class="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full border bg-card/80 p-1.5 shadow-lg backdrop-blur-md
-             md:inset-y-0 md:left-0 md:w-52 md:translate-x-0 md:flex-col md:items-stretch md:gap-1 md:rounded-none md:border-0 md:border-r md:bg-transparent md:p-4 md:shadow-none md:backdrop-blur-none"
+      class="fixed inset-x-0 bottom-0 z-20 flex items-center justify-around gap-1 border-t bg-card/95 px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-md
+             md:inset-y-0 md:left-0 md:right-auto md:justify-start md:w-52 md:translate-x-0 md:flex-col md:items-stretch md:gap-1 md:rounded-none md:border-0 md:border-r md:bg-transparent md:p-4 md:shadow-none md:backdrop-blur-none"
     >
       <span class="mb-4 hidden px-2 text-xl font-light tracking-tight md:block">socle</span>
       {#each onglets as o}

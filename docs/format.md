@@ -8,7 +8,7 @@ Il remplace le « document du socle » annoncé dans `REPRISE.md`. Mis à jour l
 
 | Élément | Règle |
 |---|---|
-| **Navigation** | Rail à gauche sur PC (900 px et plus), avec les noms. Pilule d'icônes flottante en bas sur iPhone, sans noms : le nom de la section est le titre de l'écran |
+| **Navigation** | Rail à gauche sur PC (900 px et plus), avec les noms. Barre d'icônes **collée au bord bas** sur iPhone, sur toute la largeur, sans noms : le nom de la section est le titre de l'écran (choix de Julien, 22/11/2026 ; avant : pilule flottante) |
 | **Entrées** | Peu : entre quatre et six. Toujours **Connexion** et **Réglages** ; presque toujours **À traiter** |
 | **À traiter** | Une grille de tuiles, une par type de chose à faire, avec son nombre. Une tuile ouvre sa liste. Le compteur de l'onglet ne compte que ce qui attend une décision |
 | **Connexion** | Écran commun (0.10.0, contrat 3 : `frontend/src/lib/services/`, recopié tel quel). Une fiche par service extérieur : point et état en mots (Répond, Ne répond pas, Relié, Pas relié), **Ce qui est lu**, **Ce qui est écrit**, « Pour le relier, dans la stack » s'il n'est pas relié, âge du dernier essai. **De 1 à 3 services : fiches dépliées ; à partir de 4 : tuiles à voyant, la fiche s'ouvre dessous au toucher.** Gestes : **Vérifier** (contour, ne teste que ce service, essai léger sans écriture ni coût) et au plus un geste qui écrit (plein : Synchroniser, Livrer…). Le dossier de données n'est pas un service : il est dans Réglages. Données : `GET /api/maison/services` (session ou `ANNEAU_CLE`) |
@@ -41,7 +41,7 @@ Neutres communs : fond `#151311`, surface `#1f1c19`, filet `#312c27`, texte `#f2
 
 **Le geste répété ne passe jamais derrière une tuile.** carnet trie des cas variés de temps en temps : sa grille de tuiles est son écran d'ouverture. Millésime répète un seul geste des centaines de fois : il s'ouvre sur « Dater », et sa grille est une entrée à part. Le format sert le travail de l'appli, pas l'inverse (avis du conseil, Millésime 2.0).
 
-Sur iPhone, dans un écran où l'on valide à la chaîne, la pilule s'efface pour ne rien laisser entre le pouce et le bouton ; un lien en haut ramène à la navigation.
+Sur iPhone, dans un écran où l'on valide à la chaîne, la barre d'onglets s'efface pour ne rien laisser entre le pouce et le bouton ; un lien en haut ramène à la navigation.
 
 ## 3. Sécurité : ce que toute appli qui écrit doit avoir
 
