@@ -1,5 +1,10 @@
 # Journal des versions
 
+## 0.12.2 — 23 novembre 2026 (listes déroulantes lisibles en sombre)
+- **Listes déroulantes illisibles sur PC** (constaté par Julien dans Dîme, 23/11/2026) : la liste ouverte d'un `<select>` gardait un fond blanc (dessinée par le navigateur, Windows) tout en reprenant le texte crème de l'appli. `app.css` (couche `base`) donne aux `option` et `optgroup` le fond et le texte des menus (`--popover`, `--popover-foreground`), les titres de groupe en gras, les choix désactivés en gris. Leçon dans `docs/lecons.md` § 24.
+- Recopié dans les applis le même jour (sauf Transhumance, en cours de travail) : le bloc est repérable par « Listes déroulantes (socle 0.12.2) ».
+- **Jamais essayé sur la vraie installation** (essai d'écran dans Chromium seulement).
+
 ## 0.12.1 — 22 novembre 2026 (barre d'onglets collée en bas)
 - **iPhone : la barre d'onglets est collée au bord bas**, sur toute la largeur (choix de Julien, 22/11/2026, pour toutes les applis maison), au lieu de la pilule flottante. Le rail des PC ne change pas. `App.svelte`, `docs/format.md` (Navigation), leçon dans `docs/lecons.md`.
 - Recopié à la main dans chaque appli (le gabarit de navigation n'est pas un fichier commun signé).

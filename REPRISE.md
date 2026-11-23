@@ -2,6 +2,8 @@
 
 Fichier à lire en premier dans une nouvelle session, et à mettre à jour à chaque fin de session, dans le même commit que le code.
 
+## État (23/11/2026) — 0.12.2 : listes déroulantes lisibles en sombre (`app.css`, bloc « Listes déroulantes (socle 0.12.2) », leçon § 24), recopié dans les applis le même jour sauf Transhumance.
+
 ## État (22/11/2026) — 0.12.1 : barre d'onglets collée en bas sur iPhone (`App.svelte`, `format.md`, `lecons.md`), recopiée dans les applis le même jour.
 
 ## État (21/11/2026)

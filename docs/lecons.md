@@ -304,6 +304,13 @@ clé    = PBKDF2-SHA256(mot de passe commun, sel "maison-session|", 200 000 tour
 - Retrouver un envoi par son titre unique ; chercher avant d'envoyer ; ne jamais renvoyer automatiquement un envoi parti.
 - Deux jetons qui se ressemblent se confondent : mettre un prénom sur chaque compte de service et faire refuser deux jetons identiques par les outils.
 
+## 24. Listes déroulantes en thème sombre (socle 0.12.2, 23/11/2026)
+
+- **La liste ouverte d'un `<select>` n'est pas dessinée par la page** : sur PC (Windows, Chrome, Edge et le navigateur de l'appli Claude), elle peut garder un fond clair malgré `color-scheme: dark`, tout en reprenant la couleur du texte du `<select>` (crème) : texte presque invisible. Styler le `<select>` ne suffit pas.
+- Règle commune dans `app.css` : `select option, select optgroup { background-color: var(--popover); color: var(--popover-foreground); }`, titres de groupe en gras, choix désactivés en `--muted-foreground`. Un gris propre à l'appli (« déjà saisi ») reste dans le style de l'écran.
+- L'iPhone dessine sa propre roue et ignore ces couleurs : une information portée par la couleur d'un choix doit aussi être écrite (« (déjà saisi) »).
+- À vérifier à chaque nouvel écran : ouvrir une liste sur PC, pas seulement la regarder fermée.
+
 ## 15. Ce qui reste vrai d'une appli à l'autre
 
 - Une première version qui ne fait que lire se livre en une séance et apprend plus qu'une sonde.
